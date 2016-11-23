@@ -1,0 +1,60 @@
+"""Measure difference in runtime-speed for SICER and epic.
+
+Use H3K27me3 data in early S-phase (0, 3, 15, 18)
+"""
+
+__author__ = "Endre Bakken Stovner https://github.com/endrebak/"
+__license__ = "MIT"
+
+chip_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_0h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_15h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_18h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_3h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_0h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_15h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_18h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_3h_H3K27me3.bed"]
+
+input_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_0h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_15h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_18h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_3h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_0h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_15h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_18h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_3h_Input.bed"]
+
+rule run_epic:
+    input:
+        chip = chip_data,
+        input = input_data
+    output:
+        "data/epic_results/fdr_list.csv"
+    log:
+        "data/epic_results/time_info"
+    shell:
+        "(epic command) >& {log[0]} > {output[0]}"
+
+
+rule concat_files_for_sicer:
+    input:
+        chip = chip_data,
+        input = input_data
+    output:
+        chip = "data/chip.bed",
+        input = "data/input.bed"
+    run:
+        shell("cat {input.chip} > {output.chip}")
+        shell("cat {input.input} > {output.input}")
+
+
+rule run_sicer:
+    input:
+        chip = "data/chip.bed",
+        input = "data/input.bed"
+    output:
+        "data/sicer_results/fdr_list.csv"
+    log:
+        "data/sicer_results/time_info"
+    shell:
+        "SICER command >& {log[0]} > {output[0]}"
