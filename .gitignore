@@ -1,0 +1,13 @@
+*.snakemake
+*graph
+data/
+*swp
+*-summary
+*scoreisland
+*chr.list
+*pyc
+*dat
+*bed1
+*bed
+*FDR1.0
+*wig

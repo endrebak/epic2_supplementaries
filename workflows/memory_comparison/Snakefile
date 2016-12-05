@@ -1,0 +1,83 @@
+"""Measure difference in runtime-speed for SICER and epic.
+
+Use H3K27me3 data in early S-phase (0, 3, 15, 18)
+"""
+
+__author__ = "Endre Bakken Stovner https://github.com/endrebak/"
+__license__ = "MIT"
+
+shell.executable("bash")
+
+
+chip_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_0h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_15h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_18h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_3h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_0h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_15h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_18h_H3K27me3.bed",
+             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_3h_H3K27me3.bed"]
+
+
+input_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_0h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_15h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_18h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_3h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_0h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_15h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_18h_Input.bed",
+              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_3h_Input.bed"]
+
+
+rule all:
+    input:
+        "data/sicer_results/chip-W200-G600-islands-summary-FDR1.0",
+        "data/chip.bed",
+        "data/input.bed"
+
+
+'mprof run -T 0.000001 echo "hello world"'
+
+
+if False:
+    for f in shell("ls *dat", iterable=True):
+        pass
+
+
+'cut -f 2 -d " " *.dat | sort --reverse -n'
+
+
+rule run_epic:
+    input:
+        chip = chip_data,
+        input = input_data
+    output:
+        "data/epic_results/fdr_list.csv"
+    log:
+        "data/epic_results/time_info"
+    shell:
+        "mprof run -C epic -cpu 25 -t {chip} -c {input.input} > {output.outfile}"
+
+
+rule concat_files_for_sicer:
+    input:
+        chip = chip_data,
+        input = input_data
+    output:
+        chip = "data/chip.bed",
+        input = "data/input.bed"
+    run:
+        shell("cat {input.chip} > {output.chip}")
+        shell("cat {input.input} > {output.input}")
+
+
+rule run_sicer:
+    input:
+        chip = "data/chip.bed",
+        input = "data/input.bed"
+    output:
+        "data/sicer_results/chip-W200-G600-islands-summary-FDR1.0"
+    log:
+        "data/sicer_results/time_info"
+    shell:
+        "/usr/bin/time -o {log[0]} sh ../../SICER/SICER.sh data/ chip.bed input.bed data/sicer_results hg19 1 200 150 0.85 600 1.0 `pwd`/../.."
