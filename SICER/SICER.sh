@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # Authors: Chongzhi Zang, Weiqun Peng
 #
 # Comments and/or additions are welcome (send e-mail to:
@@ -10,15 +10,16 @@
 ##############################################################
 # ##### Please replace PATHTO with your own directory ###### #
 ##############################################################
+source activate py27
 
-PATHTO=/home/data/SICER1.1
+PATHTO=${12}
 SICER=$PATHTO/SICER
 PYTHONPATH=$SICER/lib
 export PYTHONPATH
 
 if [ $# -lt 11 ]; then
     echo ""
-    echo 1>&2 Usage: $0 ["InputDir"] ["bed file"] ["control file"] ["OutputDir"] ["Species"] ["redundancy threshold"] ["window size (bp)"] ["fragment size"] ["effective genome fraction"]   ["gap size (bp)"] ["FDR"]  
+    echo 1>&2 Usage: $0 ["InputDir"] ["bed file"] ["control file"] ["OutputDir"] ["Species"] ["redundancy threshold"] ["window size (bp)"] ["fragment size"] ["effective genome fraction"]   ["gap size (bp)"] ["FDR"]
     echo ""
     exit 1
 fi
@@ -75,7 +76,7 @@ CHIPTHRESHOLD=${CHIPTHRESHOLD:=1}
 CONTROLTHRESHOLD=$6
 CONTROLTHRESHOLD=${CONTROLTHRESHOLD:=1}
 
-# WINDOW_SIZE is the size of the windows to scan the genome width. 
+# WINDOW_SIZE is the size of the windows to scan the genome width.
 # One WINDOW_SIZE is the smallest possible island.
 WINDOW_SIZE=$7
 
@@ -127,10 +128,10 @@ echo "False discovery rate controlling significance: $FDR"
 FILTEREDSAMPLEBED=$SAMPLE-${CHIPTHRESHOLD}-removed.bed
 FILTEREDCONTROLBED=$CONTROL-${CONTROLTHRESHOLD}-removed.bed
 
-# This file stores the summary graph.  
+# This file stores the summary graph.
 SUMMARY=$SAMPLE-W$WINDOW_SIZE.graph
 NORMALIZEDSUMMARY=$SAMPLE-W$WINDOW_SIZE-normalized.graph
-# This file stores the histogram of window read-count.  
+# This file stores the histogram of window read-count.
 SUMMARYHIST=$SAMPLE-W$WINDOW_SIZE.graphhist
 # This file stores the summary graph in wig vstep format
 NORMALIZEDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-normalized.wig
@@ -153,12 +154,12 @@ ISLANDSCOREHIST=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR.islandscorehist
 ISLANDLENGTHHIST=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR.islandlengthhist
 
 
-# This file stores the island-filtered non-redundant raw reads 
+# This file stores the island-filtered non-redundant raw reads
 ISLANDFILTEREDRAWBED=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered.bed
-# This file stores summary graph made by the island-filtered non-redundant raw reads 
+# This file stores summary graph made by the island-filtered non-redundant raw reads
 ISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered.graph
-# This file stores normalized summary graph made by the island-filtered non-redundant raw reads 
-NORMALIZEDISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered-normalized.graph 
+# This file stores normalized summary graph made by the island-filtered non-redundant raw reads
+NORMALIZEDISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered-normalized.graph
 # This file stores normalized summary graph made by the island-filtered non-redundant raw reads in wig vstep format
 NORMALIZEDISLANDFILTEREDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered-normalized.wig
 
@@ -180,7 +181,7 @@ echo " "
 echo "Partion the genome in windows ..."
 echo "Generate summary files ..."
 echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY 
+python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
 
 echo ""
 echo ""
@@ -188,13 +189,13 @@ echo "Normalize summary graph by total island filtered reads per million for $SA
 echo "python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
 python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
-echo ""
-echo ""
-echo "Convert the normalized summary graph into wig vstep format..."
-echo "sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
-sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE
+# echo ""
+# echo ""
+# echo "Convert the normalized summary graph into wig vstep format..."
+# echo "sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
+# sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE
 
-rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
+# rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
 
 echo " "
@@ -221,41 +222,41 @@ python $SICER/src/filter_islands_by_significance.py -i $ISLANDS_BED_DIR/$ISLANDS
 
 
 
-echo ""
-echo ""
-echo "Convert island summary to island bed file of format chr start end ChIP-read-count"
-echo "python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED"
-python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED
+# echo ""
+# echo ""
+# echo "Convert island summary to island bed file of format chr start end ChIP-read-count"
+# echo "python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED"
+# python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED
 
 
-echo ""
-echo ""
-echo "Filter reads with identified significant islands..."
-echo "python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
-python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
+# echo ""
+# echo ""
+# echo "Filter reads with identified significant islands..."
+# echo "python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
+# python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
 
 
-echo ""
-echo ""
-echo "Make summary graph with filtered reads..."
-echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
+# echo ""
+# echo ""
+# echo "Make summary graph with filtered reads..."
+# echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
+# python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
 
 
-echo ""
-echo ""
-echo "Normalize summary graph with filtered reads for $SAMPLE by total island filtered reads per million..."
-echo "python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
-python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
+# echo ""
+# echo ""
+# echo "Normalize summary graph with filtered reads for $SAMPLE by total island filtered reads per million..."
+# echo "python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
+# python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
 
-echo ""
-echo ""
-echo "Convert the summary graph made with the filtered reads into wig vstep format and normalize by total island-filtered read count per million..."
-echo "sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
-sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE-islandfiltered $WINDOW_SIZE
+# echo ""
+# echo ""
+# echo "Convert the summary graph made with the filtered reads into wig vstep format and normalize by total island-filtered read count per million..."
+# echo "sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
+# sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE-islandfiltered $WINDOW_SIZE
 
-rm $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
-rm $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
+# rm $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
+# rm $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
 
 echo ""
 echo ""
