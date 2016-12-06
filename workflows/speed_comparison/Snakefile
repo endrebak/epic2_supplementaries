@@ -56,8 +56,9 @@ input_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_0h_Input.
 chip_data_early = [f for f in chip_data if re.search("0h|3h|15h|18h", f)]
 input_data_early = [f for f in input_data if re.search("0h|3h|15h|18h", f)]
 
-chip_data_0h = [f for f in chip_data if f == "0h"]
-input_data_0h = [f for f in input_data if f == "0h"]
+chip_data_0h = [f for f in chip_data if "0h" in f]
+input_data_0h = [f for f in input_data if "0h" in f]
+
 
 infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chip", "0h"): chip_data_0h,
            ("input", "early"): input_data_early, ("input", "all"): input_data, ("input", "0h"): input_data_0h}
@@ -87,6 +88,7 @@ rule run_epic:
 
         start_time = time.time()
         open(log[0], "w+").write("Starting: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+
         if wildcards.bigwig == "bigwig":
             shell("/usr/bin/time -o {log[0]} epic -cpu 25 -bw data/epic_results -t {chip} -c {input} >> {output[0]}")
         else:
@@ -107,6 +109,7 @@ rule concat_files_for_sicer:
     resources:
         instances = 1
     run:
+        print(input)
         chip = [f for f in input if "H3K27me3" in f]
         input = [f for f in input if "Input" in f]
 
@@ -130,9 +133,9 @@ rule run_sicer:
         start_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         if wildcards.bigwig == "bigwig":
-            shell("/usr/bin/time -o {log[0]} sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 `pwd`/../..")
+            shell("/usr/bin/time -o {log[0]} sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 `pwd`/../.. >> {log[0]}")
         else:
-            shell("/usr/bin/time -o {log[0]} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 `pwd`/../..")
+            shell("/usr/bin/time -o {log[0]} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 `pwd`/../.. >> {log[0]}")
 
         open(log[0], "a").write("Starting: " + start_datetime + "\n")
         open(log[0], "a").write("Ending: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
