@@ -8,6 +8,7 @@ __license__ = "MIT"
 
 from glob import glob
 from os import environ
+from subprocess import check_output
 
 if not environ.get("TMUX", ""):
     raise Exception("Not using TMUX!")
@@ -65,10 +66,11 @@ infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chi
 
 rule all:
     input:
+        "data/memory_usage.csv",
         expand("data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
-               subset="0h all early".split(), bigwig="bigwig no_bigwig".split()),
-        expand("data/epic_results/{subset}/{bigwig}/fdr_list.csv",
-               subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
+               bigwig="bigwig no_bigwig".split(), subset="0h all early".split()),
+        # expand("data/epic_results/{subset}/{bigwig}/fdr_list.csv",
+        #        subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
 
 
 rule run_epic:
@@ -78,24 +80,16 @@ rule run_epic:
     output:
         result = "data/epic_results/{subset}/{bigwig}/fdr_list.csv",
         memory = "data/epic_results/{subset}/{bigwig}/memory.csv"
-    log:
-        "data/epic_results/{subset}_{bigwig}_time_info"
     resources:
         instances = 1
     run:
         chip = [f for f in input if "H3K27me3" in f]
         input = [f for f in input if "Input" in f]
 
-        existing_dats = set(glob("*dat"))
-
         if wildcards.bigwig == "bigwig":
-            shell("mprof run -T 10 -C epic -cpu 25 -bw data/epic_results -t {chip} -c {input} >> {output[0]}")
+            shell("OUTFILE={output.memory} sh ./memusg epic -cpu 25 -bw data/epic_results -t {chip} -c {input} > {output.result} 2> {output.memory}")
         else:
-            shell("mprof run -T 10 -C epic -cpu 25 -t {chip} -c {input} >> {output[0]}")
-
-        new_dat = list(existing_dats - set(glob("*dat")))[0]
-
-        shell("mv {new_dat} {output.memory}")
+            shell("OUTFILE={output.memory} sh ./memusg epic -cpu 25 -t {chip} -c {input} > {output.result} 2> {output.memory}")
 
 
 rule concat_files_for_sicer:
@@ -123,19 +117,29 @@ rule run_sicer:
     output:
         result = "data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
         memory = "data/sicer_results/{subset}/{bigwig}/memory.csv",
-    log:
-        "data/sicer_results/{subset}_{bigwig}_time_info"
     resources:
         instances = 1
     run:
-
-        existing_dats = set(glob("*dat"))
+        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode()
+        print(pwd)
 
         if wildcards.bigwig == "bigwig":
-            shell("mprof run -T 10 -C sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 `pwd`/../.. >> {log[0]}")
+            shell("OUTFILE={output.memory} sh ./memusg sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}/../.. 2> {output.memory}")
         else:
-            shell("mprof run -T 10 -C sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 `pwd`/../.. >> {log[0]}")
+            shell("OUTFILE={output.memory} sh ./memusg sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}/../..")
 
-        new_dat = list(existing_dats - set(glob("*dat")))[0]
 
-        shell("mv {new_dat} {output.memory}")
+rule memory_comparisons:
+    input:
+        sicer = expand("data/epic_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig="bigwig no_bigwig".split()),
+        epic = expand("data/sicer_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
+    output:
+        "data/memory_usage.csv"
+    run:
+        get_wildcards = re.compile("_results\/(\w+)\/(\w+)")
+        for f in input.sicer:
+            print(re.search(get_wildcards, f).groups())
+            memory_used = int(open(f).readlines()[-1].split("=")[1])
+            print(memory_used)

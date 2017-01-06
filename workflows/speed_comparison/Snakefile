@@ -86,7 +86,7 @@ rule run_epic:
         chip = [f for f in input if "H3K27me3" in f]
         input = [f for f in input if "Input" in f]
 
-        start_time = time.time()
+        start_time = time()
         open(log[0], "w+").write("Starting: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
 
         if wildcards.bigwig == "bigwig":
