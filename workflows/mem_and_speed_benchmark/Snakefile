@@ -10,6 +10,8 @@ from glob import glob
 from os import environ
 from subprocess import check_output
 
+import pandas as pd
+
 if not environ.get("TMUX", ""):
     raise Exception("Not using TMUX!")
 
@@ -87,9 +89,9 @@ rule run_epic:
         input = [f for f in input if "Input" in f]
 
         if wildcards.bigwig == "bigwig":
-            shell("OUTFILE={output.memory} sh ./memusg epic -cpu 25 -bw data/epic_results -t {chip} -c {input} > {output.result} 2> {output.memory}")
+            shell("/usr/bin/time -v -o {output.memory} epic -cpu 25 -bw data/epic_results -t {chip} -c {input} > {output.result}")
         else:
-            shell("OUTFILE={output.memory} sh ./memusg epic -cpu 25 -t {chip} -c {input} > {output.result} 2> {output.memory}")
+            shell("/usr/bin/time -v -o {output.memory} epic -cpu 25 -t {chip} -c {input} > {output.result}")
 
 
 rule concat_files_for_sicer:
@@ -120,26 +122,52 @@ rule run_sicer:
     resources:
         instances = 1
     run:
-        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode()
-        print(pwd)
+        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
 
         if wildcards.bigwig == "bigwig":
-            shell("OUTFILE={output.memory} sh ./memusg sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}/../.. 2> {output.memory}")
+            print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
         else:
-            shell("OUTFILE={output.memory} sh ./memusg sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}/../..")
+            print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
 
 
 rule memory_comparisons:
     input:
-        sicer = expand("data/epic_results/{subset}/{bigwig}/memory.csv",
+        epic = expand("data/epic_results/{subset}/{bigwig}/memory.csv",
                        subset="0h all early".split(), bigwig="bigwig no_bigwig".split()),
-        epic = expand("data/sicer_results/{subset}/{bigwig}/memory.csv",
+        sicer = expand("data/sicer_results/{subset}/{bigwig}/memory.csv",
                        subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
     output:
         "data/memory_usage.csv"
     run:
-        get_wildcards = re.compile("_results\/(\w+)\/(\w+)")
-        for f in input.sicer:
-            print(re.search(get_wildcards, f).groups())
-            memory_used = int(open(f).readlines()[-1].split("=")[1])
-            print(memory_used)
+        results = []
+        for f in input.sicer + input.epic:
+            print(f)
+            software, files, bigwig = f.split("/")[1:-1]
+
+            for line in open(f):
+
+                if "Maximum resident set size (kbytes):" in line:
+                    gb = int(line.split(": ")[-1]) / 1e6
+
+                elif "Elapsed (wall clock) time" in line:
+                    time = line.split(": ")[-1].strip()
+                    time_split = time.split(":")
+
+                    if len(time_split) == 2:
+                        hours, minutes, seconds = 0, time_split[0], time_split[1]
+                    elif len(time_split) == 3:
+                        hours, minutes, seconds = time_split
+
+            results.append({"Software": software, "Files": files,
+                            "Bigwig": bigwig, "MaxRSSGB": gb, "Hours": hours,
+                            "Minutes": minutes, "Seconds": seconds})
+
+        results = pd.DataFrame.from_dict(results)[
+            ["Software", "Files", "Bigwig", "MaxRSSGB", "Hours", "Minutes",
+             "Seconds"]]
+
+        results = results.sort_values(["Files", "Bigwig", "Software"])
+
+        print(results)
