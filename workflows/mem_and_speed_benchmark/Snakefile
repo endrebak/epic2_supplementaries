@@ -3,6 +3,24 @@
 Use H3K27me3 data in early S-phase (0, 3, 15, 18)
 """
 
+"""
+Old results, before using -sbw:
+
+         Software  Files     Bigwig    MaxRSSGB Hours Minutes Seconds
+6    epic_results     0h     bigwig   34.735984     0       6   12.52
+0   sicer_results     0h     bigwig   19.247248     0      37   00.74
+7    epic_results     0h  no_bigwig   11.809360     0       3   06.80
+1   sicer_results     0h  no_bigwig   19.248000     0      20   03.48
+8    epic_results    all     bigwig  116.491936     0      34   54.94
+2   sicer_results    all     bigwig   27.026208     5      02      16
+9    epic_results    all  no_bigwig   55.881088     0      26   42.92
+3   sicer_results    all  no_bigwig   27.026480     4      27      07
+10   epic_results  early     bigwig   62.195264     0      17   24.71
+4   sicer_results  early     bigwig   25.626192     2      32      35
+11   epic_results  early  no_bigwig   29.338608     0      10   27.37
+5   sicer_results  early  no_bigwig   25.625936     2      08      50
+"""
+
 __author__ = "Endre Bakken Stovner https://github.com/endrebak/"
 __license__ = "MIT"
 
@@ -14,6 +32,8 @@ import pandas as pd
 
 if not environ.get("TMUX", ""):
     raise Exception("Not using TMUX!")
+
+from snakemake.utils import R
 
 shell.executable("bash")
 
@@ -55,6 +75,7 @@ input_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_0h_Input.
               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_6h_Input.bed",
               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_9h_Input.bed"]
 
+
 chip_data_early = [f for f in chip_data if re.search("0h|3h|15h|18h", f)]
 input_data_early = [f for f in input_data if re.search("0h|3h|15h|18h", f)]
 
@@ -68,7 +89,12 @@ infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chi
 
 rule all:
     input:
+        "data/speed_epic_vs_SICER_memory.pdf",
+        expand("data/macs2_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig"),
+        "data/file_sizes.csv",
         "data/memory_usage.csv",
+        "data/speed_epic_vs_SICER.csv",
+        "data/speed_epic_vs_SICER.pdf",
         expand("data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
                bigwig="bigwig no_bigwig".split(), subset="0h all early".split()),
         # expand("data/epic_results/{subset}/{bigwig}/fdr_list.csv",
@@ -92,6 +118,27 @@ rule run_epic:
             shell("/usr/bin/time -v -o {output.memory} epic -cpu 25 -bw data/epic_results -t {chip} -c {input} > {output.result}")
         else:
             shell("/usr/bin/time -v -o {output.memory} epic -cpu 25 -t {chip} -c {input} > {output.result}")
+
+
+from os.path import expanduser
+python2_bin = expanduser("~/anaconda3/envs/py27/bin/")
+rule run_macs2:
+    input:
+        chip = lambda w: infiles["chip", w.subset],
+        input = lambda w: infiles["input", w.subset]
+    output:
+        # result = "data/macs2_results/{subset}/{bigwig}/fdr_list.csv",
+        memory = "data/macs2_results/{subset}/{bigwig}/memory.csv"
+    resources:
+        instances = 1
+    run:
+        chip = [f for f in input if "H3K27me3" in f]
+        input = [f for f in input if "Input" in f]
+
+        if wildcards.bigwig == "bigwig":
+            raise Exception("Bigwig/macs not applicable")
+        else:
+            shell("/usr/bin/time -v -o {output.memory} {python2_bin}/macs2 callpeak --extsize 150 --nomodel --broad --broad-cutoff 0.05 --gsize hs -q 0.05 -t {chip} -c {input} -n data/macs2_results/{wildcards.subset}/{wildcards.bigwig}/")
 
 
 rule concat_files_for_sicer:
@@ -132,17 +179,20 @@ rule run_sicer:
             shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
 
 
+bigwig = "no_bigwig"
 rule memory_comparisons:
     input:
         epic = expand("data/epic_results/{subset}/{bigwig}/memory.csv",
-                       subset="0h all early".split(), bigwig="bigwig no_bigwig".split()),
+                       subset="0h all early".split(), bigwig=bigwig),
         sicer = expand("data/sicer_results/{subset}/{bigwig}/memory.csv",
-                       subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
+                       subset="0h all early".split(), bigwig=bigwig),
+        macs2 = expand("data/macs2_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig=bigwig),
     output:
         "data/memory_usage.csv"
     run:
         results = []
-        for f in input.sicer + input.epic:
+        for f in input.sicer + input.epic + input.macs2:
             print(f)
             software, files, bigwig = f.split("/")[1:-1]
 
@@ -159,15 +209,97 @@ rule memory_comparisons:
                         hours, minutes, seconds = 0, time_split[0], time_split[1]
                     elif len(time_split) == 3:
                         hours, minutes, seconds = time_split
+                    minutes = int(hours) * 60 + int(minutes)
 
             results.append({"Software": software, "Files": files,
-                            "Bigwig": bigwig, "MaxRSSGB": gb, "Hours": hours,
-                            "Minutes": minutes, "Seconds": seconds})
+                            "Bigwig": bigwig, "MaxRSSGB": gb,
+                            "Minutes": minutes})
 
         results = pd.DataFrame.from_dict(results)[
-            ["Software", "Files", "Bigwig", "MaxRSSGB", "Hours", "Minutes",
-             "Seconds"]]
+            ["Software", "Files", "Bigwig", "MaxRSSGB", "Minutes"]]
 
         results = results.sort_values(["Files", "Bigwig", "Software"])
 
         print(results)
+
+        results.to_csv(output[0], sep=" ", index=False)
+
+
+rule get_file_sizes:
+    output:
+        "data/file_sizes.csv"
+    run:
+
+        all_sum = 0
+        for f in chip_data + input_data:
+            all_sum += float(os.stat(f).st_size/(1024*1024*1024))
+
+        early_sum = 0
+        for f in chip_data_early + input_data_early:
+            early_sum += float(os.stat(f).st_size/(1024*1024*1024))
+
+
+        h0_sum = 0
+        for f in chip_data_0h + input_data_0h:
+            h0_sum += float(os.stat(f).st_size/(1024*1024*1024))
+
+        df = pd.concat([pd.Series([h0_sum, early_sum, all_sum]), pd.Series(["0h", "early", "all"])], axis=1)
+
+        df.columns = ["Size", "Files"]
+        df.to_csv(output[0], sep=" ", index=False)
+
+
+rule graph_speed_epic_vs_SICER:
+    input:
+        memory = "data/memory_usage.csv", file_size = "data/file_sizes.csv"
+    output:
+        "data/speed_epic_vs_SICER.csv"
+    run:
+        mem_df = pd.read_table(input.memory, sep=" ")
+        mem_df = mem_df.loc[mem_df.Bigwig == "no_bigwig"].drop("Bigwig", axis=1)
+
+        size_df = pd.read_table(input.file_size, sep=" ")
+
+        df = mem_df.merge(size_df, how="left", on="Files")
+
+        df.loc[:, "Software"] = df.Software.str.replace("epic_results", "epic").replace("sicer_results", "SICER").replace("macs2_results", "macs2")
+
+        df.to_csv(output[0], sep=" ")
+
+
+rule graph_epic_and_sicer_speeds_together:
+    input:
+        "data/speed_epic_vs_SICER.csv"
+    output:
+        "data/speed_epic_vs_SICER.pdf"
+    run:
+        command = """
+        library(ggplot2)
+
+        df = read.table("{input}", sep=" ", header=1)
+        df$Size = round(df$Size, 2)
+
+        linear = ggplot(df, aes(x=Size, y=Minutes)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Running time in minutes.")
+        ggsave("{output[0]}")"""
+
+        print(command)
+        R(command)
+
+
+rule graph_epic_and_sicer_memory_usage_together:
+    input:
+        "data/speed_epic_vs_SICER.csv"
+    output:
+        "data/speed_epic_vs_SICER_memory.pdf"
+    run:
+        command = """
+        library(ggplot2)
+
+        df = read.table("{input}", sep=" ", header=1)
+        df$Size = round(df$Size, 2)
+
+        linear = ggplot(df, aes(x=Size, y=MaxRSSGB)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Memory usage.")
+        ggsave("{output[0]}")"""
+
+        print(command)
+        R(command)
