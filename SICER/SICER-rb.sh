@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # Authors: Chongzhi Zang, Weiqun Peng
 #
 # Comments and/or additions are welcome (send e-mail to:
@@ -10,19 +10,19 @@
 ##############################################################
 # ##### Please replace PATHTO with your own directory ###### #
 ##############################################################
-PATHTO=/home/data/SICER1.1
+PATHTO=${11}
 SICER=$PATHTO/SICER
 PYTHONPATH=$SICER/lib
 export PYTHONPATH
 
 if [ $# -lt 10 ]; then
     echo ""
-    echo 1>&2 Usage: $0 ["InputDir"] ["bed file"] ["OutputDir"] ["species"] ["redundancy threshold"] ["window size (bp)"] ["fragment size"] ["effective genome fraction"] ["gap size (bp)"] ["E-value"] 
+    echo 1>&2 Usage: $0 ["InputDir"] ["bed file"] ["OutputDir"] ["species"] ["redundancy threshold"] ["window size (bp)"] ["fragment size"] ["effective genome fraction"] ["gap size (bp)"] ["E-value"]
     echo ""
     exit 1
 fi
 
-#TEMP=$[$3 % $2] 
+#TEMP=$[$3 % $2]
 TEMP=`expr $9 % $6`
 
 if [ $TEMP != 0 ]; then
@@ -59,7 +59,7 @@ SPECIES=${SPECIES:=hg18}
 THRESHOLD=$5
 THRESHOLD=${THRESHOLD:=1}
 
-# WINDOW_SIZE is the size of the windows to scan the genome width. 
+# WINDOW_SIZE is the size of the windows to scan the genome width.
 # One WINDOW_SIZE is the smallest possible island.
 WINDOW_SIZE=$6
 
@@ -76,7 +76,7 @@ EFFECTIVEGENOME=${EFFECTIVEGENOME:=0.74}
 if [ $(echo "$EFFECTIVEGENOME > 1"|bc) -eq 1 ]; then
 	echo ""
 	echo " $EFFECTIVEGENOME needs to be between 0 and 1 "
-	echo "" 
+	echo ""
 	exit 1
 fi
 
@@ -108,29 +108,29 @@ echo "Evalue for identification of significant islands: $EVALUE"
 # This file stores the preprocessed raw bed file.
 FILTEREDSAMPLEBED=$SAMPLE-${THRESHOLD}-removed.bed
 
-# This file stores the summary graph.  
+# This file stores the summary graph.
 SUMMARY=$SAMPLE-W$WINDOW_SIZE.graph
 NORMALIZEDSUMMARY=$SAMPLE-W$WINDOW_SIZE-normalized.graph
-# This file stores the histogram of window read-count.  
+# This file stores the histogram of window read-count.
 SUMMARYHIST=$SAMPLE-W$WINDOW_SIZE.graphhist
 # This file stores the summary graph in wig vstep format
 NORMALIZEDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-normalized.wig
 
 #This file stores the candidate islands.
 ISLAND=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE.scoreisland
-# This file stores the windows on islands. 
+# This file stores the windows on islands.
 FILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered.scoregraph
 # This file stores the histogram of island scores
 ISLANDSCOREHIST=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE.islandscorehist
 # This file stores the histogram of island lengths
 ISLANDLENGTHHIST=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE.islandlengthhist
 
-# This file stores the island-filtered non-redundant raw reads 
+# This file stores the island-filtered non-redundant raw reads
 ISLANDFILTEREDRAWBED=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered.bed
-# This file stores summary graph made by the island-filtered non-redundant raw reads 
+# This file stores summary graph made by the island-filtered non-redundant raw reads
 ISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered.graph
-# This file stores normalized summary graph made by the island-filtered non-redundant raw reads 
-NORMALIZEDISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered-normalized.graph 
+# This file stores normalized summary graph made by the island-filtered non-redundant raw reads
+NORMALIZEDISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered-normalized.graph
 # This file stores normalized summary graph made by the island-filtered non-redundant raw reads in wig vstep format
 NORMALIZEDISLANDFILTEREDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered-normalized.wig
 
@@ -147,7 +147,7 @@ echo " "
 echo "Partion the genome in windows ..."
 echo "Generate summary files for $SAMPLE..."
 echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY 
+python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
 
 echo ""
 echo ""

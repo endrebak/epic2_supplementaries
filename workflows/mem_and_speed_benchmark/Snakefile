@@ -33,48 +33,93 @@ import pandas as pd
 if not environ.get("TMUX", ""):
     raise Exception("Not using TMUX!")
 
-from snakemake.utils import R
 
 shell.executable("bash")
 
-chip_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_0h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_12h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_15h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_18h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_21h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_24h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_3h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_6h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_9h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_0h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_12h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_15h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_18h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_21h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_24h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_3h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_6h_H3K27me3.bed",
-             "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_9h_H3K27me3.bed"]
+prefix = "/mnt/scratch/projects/epic_bencmarks"
 
-input_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_0h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_12h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_15h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_18h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_21h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_24h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_3h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_6h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_9h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_0h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_12h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_15h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_18h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_21h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_24h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_3h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_6h_Input.bed",
-              "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_9h_Input.bed"]
 
+chip_data = ['/mnt/scratch/projects/epipp/data/bam/Exp1_0h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_12h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_15h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_18h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_21h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_24h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_3h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_6h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_9h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_Unsynchronized_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_0h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_12h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_15h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_18h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_21h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_24h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_3h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_6h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_9h_H3K27me3.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_Unsynchronized_H3K27me3.bed']
+
+
+input_data = ['/mnt/scratch/projects/epipp/data/bam/Exp1_0h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_12h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_15h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_18h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_21h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_24h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_3h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_6h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_9h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_Unsynchronized_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_0h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_12h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_15h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_18h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_21h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_24h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_3h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_6h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_9h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_Unsynchronized_Input.bed']
+
+
+# chip_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_0h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_12h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_15h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_18h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_21h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_24h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_3h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_6h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp1_9h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_0h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_12h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_15h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_18h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_21h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_24h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_3h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_6h_H3K27me3.bed",
+#              "/local/home/endrebak/genomes/epipp_chip/hg38/H3K27me3/Exp2_9h_H3K27me3.bed"]
+
+# input_data = ["/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_0h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_12h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_15h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_18h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_21h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_24h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_3h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_6h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp1_9h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_0h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_12h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_15h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_18h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_21h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_24h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_3h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_6h_Input.bed",
+#               "/local/home/endrebak/genomes/epipp_chip/hg38/Input/Exp2_9h_Input.bed"]
 
 chip_data_early = [f for f in chip_data if re.search("0h|3h|15h|18h", f)]
 input_data_early = [f for f in input_data if re.search("0h|3h|15h|18h", f)]
@@ -89,15 +134,16 @@ infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chi
 
 rule all:
     input:
-        "data/speed_epic_vs_SICER_memory.pdf",
-        expand("data/macs2_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig"),
-        "data/file_sizes.csv",
-        "data/memory_usage.csv",
-        "data/speed_epic_vs_SICER.csv",
-        "data/speed_epic_vs_SICER.pdf",
-        expand("data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
-               bigwig="bigwig no_bigwig".split(), subset="0h all early".split()),
-        # expand("data/epic_results/{subset}/{bigwig}/fdr_list.csv",
+        "{prefix}/data/speed_epic_vs_SICER_memory.pdf".format(prefix=prefix),
+        expand("{prefix}/data/epic_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
+        expand("{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
+        # "{prefix}/data/file_sizes.csv".format(prefix=prefix),
+        # "{prefix}/data/memory_usage.csv".format(prefix=prefix),
+        # "{prefix}/data/speed_epic_vs_SICER.csv".format(prefix=prefix),
+        expand("{prefix}/data/speed_epic_vs_SICER_{bigwig}.pdf", prefix=prefix, bigwig="bigwig no_bigwig".split()),
+        expand("{prefix}/data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
+               bigwig="bigwig no_bigwig".split(), subset="0h all early".split(), prefix=prefix),
+        # expand("{prefix}/data/epic_results/{subset}/{bigwig}/fdr_list.csv",
         #        subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
 
 
@@ -106,29 +152,35 @@ rule run_epic:
         chip = lambda w: infiles["chip", w.subset],
         input = lambda w: infiles["input", w.subset]
     output:
-        result = "data/epic_results/{subset}/{bigwig}/fdr_list.csv",
-        memory = "data/epic_results/{subset}/{bigwig}/memory.csv"
+        result = "{prefix}/data/epic_results/{subset}/{bigwig}/fdr_list.csv",
+        memory = "{prefix}/data/epic_results/{subset}/{bigwig}/memory.csv"
     resources:
         instances = 1
+    threads: 48
     run:
-        chip = [f for f in input if "H3K27me3" in f]
-        input = [f for f in input if "Input" in f]
+        # chip = [f for f in input if "Input" not in f]
+        # input = [f for f in input if "H3K27me3_Input" in f]
+
+        # overlaps_chip_input = set(chip).intersection(input)
+
+
+        # assert not overlaps_chip_input, "Overlapping files in chip and input!"
 
         if wildcards.bigwig == "bigwig":
-            shell("/usr/bin/time -v -o {output.memory} epic -cpu 25 -bw data/epic_results -t {chip} -c {input} > {output.result}")
+            shell("/usr/bin/time -v -o {output.memory} epic -cpu 48 -bw data/epic_results -t {input.chip} -c {input.input} > {output.result}")
         else:
-            shell("/usr/bin/time -v -o {output.memory} epic -cpu 25 -t {chip} -c {input} > {output.result}")
+            shell("/usr/bin/time -v -o {output.memory} epic -cpu 48 -t {input.chip} -c {input.input} > {output.result}")
 
 
 from os.path import expanduser
-python2_bin = expanduser("~/anaconda3/envs/py27/bin/")
+python2_bin = expanduser("/mnt/work/endrebak/software/anaconda/envs/py27/bin/")
+macs2_bin = "/mnt/work/endrebak/software/anaconda/envs/py27/bin/macs2"
 rule run_macs2:
     input:
         chip = lambda w: infiles["chip", w.subset],
         input = lambda w: infiles["input", w.subset]
     output:
-        # result = "data/macs2_results/{subset}/{bigwig}/fdr_list.csv",
-        memory = "data/macs2_results/{subset}/{bigwig}/memory.csv"
+        memory = "{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv"
     resources:
         instances = 1
     run:
@@ -138,7 +190,7 @@ rule run_macs2:
         if wildcards.bigwig == "bigwig":
             raise Exception("Bigwig/macs not applicable")
         else:
-            shell("/usr/bin/time -v -o {output.memory} {python2_bin}/macs2 callpeak --extsize 150 --nomodel --broad --broad-cutoff 0.05 --gsize hs -q 0.05 -t {chip} -c {input} -n data/macs2_results/{wildcards.subset}/{wildcards.bigwig}/")
+            shell("/usr/bin/time -v -o {output.memory} {macs2_bin} callpeak --extsize 150 --nomodel --broad --broad-cutoff 0.05 --gsize hs -q 0.05 -t {chip} -c {input} -n {prefix}/data/macs2_results/{wildcards.subset}/{wildcards.bigwig}/")
 
 
 rule concat_files_for_sicer:
@@ -146,12 +198,11 @@ rule concat_files_for_sicer:
         chip = lambda w: infiles["chip", w.subset],
         input = lambda w: infiles["input", w.subset]
     output:
-        chip = temp("data/{subset}_chip.bed"),
-        input = temp("data/{subset}_input.bed")
+        chip = temp("{prefix}/data/{subset}_chip.bed"),
+        input = temp("{prefix}/data/{subset}_input.bed")
     resources:
         instances = 1
     run:
-        print(input)
         chip = [f for f in input if "H3K27me3" in f]
         input = [f for f in input if "Input" in f]
 
@@ -161,40 +212,42 @@ rule concat_files_for_sicer:
 
 rule run_sicer:
     input:
-        chip = "data/{subset}_chip.bed",
-        input = "data/{subset}_input.bed"
+        chip = "{prefix}/data/{subset}_chip.bed",
+        input = "{prefix}/data/{subset}_input.bed"
     output:
-        result = "data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
-        memory = "data/sicer_results/{subset}/{bigwig}/memory.csv",
+        result = "{prefix}/data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
+        memory = "{prefix}/data/sicer_results/{subset}/{bigwig}/memory.csv",
     resources:
         instances = 1
     run:
         pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
 
+        # how to solve python2 requirements?
+
         if wildcards.bigwig == "bigwig":
-            print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
-            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
+            # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
         else:
-            print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
-            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
+            # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
 
 
-bigwig = "no_bigwig"
+bigwig = ["bigwig", "no_bigwig"] #
 rule memory_comparisons:
     input:
-        epic = expand("data/epic_results/{subset}/{bigwig}/memory.csv",
-                       subset="0h all early".split(), bigwig=bigwig),
-        sicer = expand("data/sicer_results/{subset}/{bigwig}/memory.csv",
-                       subset="0h all early".split(), bigwig=bigwig),
-        macs2 = expand("data/macs2_results/{subset}/{bigwig}/memory.csv",
-                       subset="0h all early".split(), bigwig=bigwig),
+        epic = expand("{prefix}/data/epic_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig=bigwig, prefix=prefix),
+        sicer = expand("{prefix}/data/sicer_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig=bigwig, prefix=prefix),
+        macs2 = expand("{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
     output:
-        "data/memory_usage.csv"
+        "{prefix}/data/memory_usage.csv"
     run:
         results = []
         for f in input.sicer + input.epic + input.macs2:
             print(f)
-            software, files, bigwig = f.split("/")[1:-1]
+            software, files, bigwig = f.split("/")[-4:-1]
 
             for line in open(f):
 
@@ -227,9 +280,8 @@ rule memory_comparisons:
 
 rule get_file_sizes:
     output:
-        "data/file_sizes.csv"
+        "{prefix}/data/file_sizes.csv"
     run:
-
         all_sum = 0
         for f in chip_data + input_data:
             all_sum += float(os.stat(f).st_size/(1024*1024*1024))
@@ -251,12 +303,19 @@ rule get_file_sizes:
 
 rule graph_speed_epic_vs_SICER:
     input:
-        memory = "data/memory_usage.csv", file_size = "data/file_sizes.csv"
+        memory = "{prefix}/data/memory_usage.csv", file_size = "{prefix}/data/file_sizes.csv"
     output:
-        "data/speed_epic_vs_SICER.csv"
+        "{prefix}/data/speed_epic_vs_SICER_{bigwig}.csv"
     run:
         mem_df = pd.read_table(input.memory, sep=" ")
-        mem_df = mem_df.loc[mem_df.Bigwig == "no_bigwig"].drop("Bigwig", axis=1)
+        print(mem_df)
+        mem_df = mem_df.loc[mem_df.Bigwig == wildcards.bigwig].drop("Bigwig", axis=1)
+        print(mem_df)
+
+        if wildcards.bigwig == "bigwig":
+            print(mem_df)
+            mem_df = mem_df.loc[mem_df.Software != "macs2"]
+            print(mem_df)
 
         size_df = pd.read_table(input.file_size, sep=" ")
 
@@ -269,37 +328,40 @@ rule graph_speed_epic_vs_SICER:
 
 rule graph_epic_and_sicer_speeds_together:
     input:
-        "data/speed_epic_vs_SICER.csv"
+        "{prefix}/data/speed_epic_vs_SICER_{bigwig}.csv"
     output:
-        "data/speed_epic_vs_SICER.pdf"
-    run:
-        command = """
-        library(ggplot2)
+        "{prefix}/data/speed_epic_vs_SICER_{bigwig}.pdf"
+    script:
+        "scripts/epic_speed.R"
 
-        df = read.table("{input}", sep=" ", header=1)
-        df$Size = round(df$Size, 2)
+    # run:
+    #     command = """
+    #     library(ggplot2)
 
-        linear = ggplot(df, aes(x=Size, y=Minutes)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Running time in minutes.")
-        ggsave("{output[0]}")"""
+    #     df = read.table("{input}", sep=" ", header=1)
+    #     df$Size = round(df$Size, 2)
 
-        print(command)
-        R(command)
+    #     linear = ggplot(df, aes(x=Size, y=Minutes)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Running time in minutes.")
+    #     ggsave("{output[0]}")"""
+
+    #     print(command)
+    #     R(command)
 
 
-rule graph_epic_and_sicer_memory_usage_together:
-    input:
-        "data/speed_epic_vs_SICER.csv"
-    output:
-        "data/speed_epic_vs_SICER_memory.pdf"
-    run:
-        command = """
-        library(ggplot2)
+# rule graph_epic_and_sicer_memory_usage_together:
+#     input:
+#         "{prefix}/data/speed_epic_vs_SICER.csv"
+#     output:
+#         "{prefix}/data/speed_epic_vs_SICER_memory.pdf"
+#     run:
+#         command = """
+#         library(ggplot2)
 
-        df = read.table("{input}", sep=" ", header=1)
-        df$Size = round(df$Size, 2)
+#         df = read.table("{input}", sep=" ", header=1)
+#         df$Size = round(df$Size, 2)
 
-        linear = ggplot(df, aes(x=Size, y=MaxRSSGB)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Memory usage.")
-        ggsave("{output[0]}")"""
+#         linear = ggplot(df, aes(x=Size, y=MaxRSSGB)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Memory usage.")
+#         ggsave("{output[0]}")"""
 
-        print(command)
-        R(command)
+#         print(command)
+#         R(command)

@@ -2,7 +2,7 @@
 # Authors: Chongzhi Zang, Weiqun Peng, Dustin E Schones and Keji Zhao
 #
 # Disclaimer
-# 
+#
 # This software is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -15,7 +15,7 @@
 
 
 import re, os, sys, shutil
-from math import *   
+from math import *
 from string import *
 from optparse import OptionParser
 import operator
@@ -26,7 +26,7 @@ import get_total_tag_counts
 import Background_island_probscore_statistics
 import Utility
 
-""" 
+"""
 Take in coords for bed_gaph type summary files and find 'islands' of modifications.
 There are a number options here that can be turned on or off depending on need
 Right now:
@@ -60,7 +60,7 @@ def fact(m):
 
 # Return the log of a factorial, using Srinivasa Ramanujan's approximation when m>=20
 def factln(m):
-	if m<20:  
+	if m<20:
 		value = 1.0;
 		if m != 0:
 			while m != 1:
@@ -76,7 +76,7 @@ def poisson(i, average):
 	else:
 		exponent = -average + i*log(average) - factln(i);
 		return exp(exponent);
-	
+
 
 def find_threshold(pvalue, average):
 	"""
@@ -88,7 +88,7 @@ def find_threshold(pvalue, average):
 	value -= poisson(index, average);
 	while value > pvalue:
 		index += 1;
-		value -= poisson(index, average);	
+		value -= poisson(index, average);
 	# index I is the value of which 1-P(0)-P(1)-...-P(I) < pvalue
 	return index+1;
 
@@ -107,10 +107,10 @@ def removeSingleWindowIslands(islands, window):
 def combine_proximal_islands(islands, gap, window_size_buffer=3):
 	"""
 	islands: a list of BEd_GRAPH object: (chrom, start, end, value)
-	
+
 	Extend the regions found in the find_continuous_region function.
-	If gap is not allowed, gap = 0, if one window is allowed, gap = window_size (200) 
-	
+	If gap is not allowed, gap = 0, if one window is allowed, gap = window_size (200)
+
 	Return a list of combined regions.
 	"""
 	#print len(islands);
@@ -155,7 +155,7 @@ def find_region_above_threshold_from_file(Islands_file, species, islands_minimum
         total_number_islands += len(islands);
         for i in islands:
             outline = chrom + " " + str(i.start) + " " + str(i.end) + " " \
-                      + str(i.value) + "\n";	
+                      + str(i.value) + "\n";
             outputfile.write(outline);
             total_tags_on_islands += i.value;
     outputfile.close();
@@ -165,10 +165,10 @@ def find_region_above_threshold_from_file(Islands_file, species, islands_minimum
 def main(argv):
 	"""
 	Probability scoring with random background model.
-	
+
 	"""
 	parser = OptionParser()
-	
+
 	parser.add_option("-s", "--species", action="store", type="string", dest="species", help="mm8, hg18, background, etc", metavar="<str>")
 	parser.add_option("-b", "--summarygraph", action="store",type="string", dest="summarygraph", help="summarygraph", metavar="<file>")
 	parser.add_option("-w", "--window_size(bp)", action="store", type="int", dest="window_size", help="window_size(in bps)", metavar="<int>")
@@ -176,7 +176,7 @@ def main(argv):
 	parser.add_option("-t", "--mappable_fraction_of_genome_size ", action="store", type="float", dest="fraction", help="mapable fraction of genome size", metavar="<float>")
 	parser.add_option("-e", "--evalue ", action="store", type="float", dest="evalue", help="evalue that determines score threshold for significant islands", metavar="<float>")
 	parser.add_option("-f", "--out_island_file", action="store", type="string", dest="out_island_file", help="output island file name", metavar="<file>")
-	
+
 	(opt, args) = parser.parse_args(argv)
 	if len(argv) < 14:
         	parser.print_help()
@@ -187,33 +187,33 @@ def main(argv):
 		print "Window_size: ", opt.window_size;
 		print "Gap size: ", opt.gap;
 		print "E value is:", opt.evalue;
-		
+
 		total_read_count = get_total_tag_counts.get_total_tag_counts_bed_graph(opt.summarygraph);
 		print "Total read count:", total_read_count
 		genome_length = sum (GenomeData.species_chrom_lengths[opt.species].values());
 		print "Genome Length: ", genome_length;
 		genome_length = int(opt.fraction * genome_length);
 
-		average = float(total_read_count) * opt.window_size/genome_length; 
+		average = float(total_read_count) * opt.window_size/genome_length;
 		print "Effective genome Length: ", genome_length;
 		print "Window average:", average;
-		
+
 		window_pvalue = 0.20;
 		bin_size = 0.001;
 		print "Window pvalue:", window_pvalue;
 		background = Background_island_probscore_statistics.Background_island_probscore_statistics(total_read_count, opt.window_size, opt.gap, window_pvalue, genome_length, bin_size);
 		min_tags_in_window = background.min_tags_in_window
 		print "Minimum num of tags in a qualified window: ", min_tags_in_window
-		
-		print "Generate the enriched probscore summary graph and filter the summary graph to get rid of ineligible windows "; 
+
+		print "Generate the enriched probscore summary graph and filter the summary graph to get rid of ineligible windows ";
 		#read in the summary graph file
 		bed_val = BED.BED(opt.species, opt.summarygraph, "BED_GRAPH");
-		
+
 		#generate the probscore summary graph file, only care about enrichment
 		#filter the summary graph to get rid of windows whose scores are less than window_score_threshold
-		
+
 		filtered_bed_val = {};
-		
+
 		for chrom in bed_val.keys():
 			if len(bed_val[chrom])>0:
 				filtered_bed_val [chrom]= [];
@@ -232,20 +232,20 @@ def main(argv):
 					if score > 0:
 						filtered_bed_val[chrom].append( (bed_val[chrom])[index] );
 					#print chrom, start, read_count, score;
-		
+
 		#write the probscore summary graph file
 		#Background_simulation_pr.output_bedgraph(bed_val, opt.out_sgraph_file);
-		
+
 		#Background_simulation_pr.output_bedgraph(filtered_bed_val, opt.out_sgraph_file+".filtered");
-		
-		print "Determine the score threshold from random background"; 
+
+		print "Determine the score threshold from random background";
 		#determine threshold from random background
 		hist_outfile="L" + str(genome_length) + "_W" +str(opt.window_size) + "_G" +str(opt.gap) +  "_s" +str(min_tags_in_window) + "_T"+ str(total_read_count) + "_B" + str(bin_size) +"_calculatedprobscoreisland.hist";
-		score_threshold = background.find_island_threshold(opt.evalue); 
+		score_threshold = background.find_island_threshold(opt.evalue);
 		# background.output_distribution(hist_outfile);
 		print "The score threshold is: ", score_threshold;
-		
-		
+
+
 		print "Make and write islands";
 		total_number_islands = 0;
 		outputfile = open(opt.out_island_file, 'w');
@@ -256,15 +256,15 @@ def main(argv):
 				total_number_islands += len(islands);
 				if len(islands)>0:
 					for i in islands:
-						outline = chrom + "\t" + str(i.start) + "\t" + str(i.end) + "\t" + str(i.value) + "\n";	
+						outline = chrom + "\t" + str(i.start) + "\t" + str(i.end) + "\t" + str(i.value) + "\n";
 						outputfile.write(outline);
 				else:
 					print "\t", chrom, "does not have any islands meeting the required significance";
-		outputfile.close();	
+		outputfile.close();
 		print "Total number of islands: ", total_number_islands;
-		
+
 	else:
-		print "This species is not in my list!"; 
+		print "This species is not in my list!";
 
 if __name__ == "__main__":
 	main(sys.argv)

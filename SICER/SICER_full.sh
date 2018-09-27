@@ -166,28 +166,28 @@ NORMALIZEDISLANDFILTEREDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-isla
 echo " "
 echo " "
 echo "Preprocess the raw $SAMPLE file to remove redundancy with threshold $CHIPTHRESHOLD..."
-echo "python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED"
-python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED
 
 echo " "
 echo " "
 echo "Preprocess the raw $CONTROL file to remove redundancy with threshold $CONTROLTHRESHOLD..."
-echo "python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED"
-python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED
 
 
 echo " "
 echo " "
 echo "Partion the genome in windows ..."
 echo "Generate summary files ..."
-echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
 
 echo ""
 echo ""
 echo "Normalize summary graph by total island filtered reads per million for $SAMPLE ..."
-echo "python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
-python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
 echo ""
 echo ""
@@ -201,53 +201,53 @@ rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
 echo " "
 echo " "
 echo "Find candidate islands exhibiting clustering ..."
-echo "python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE -f $ISLANDS_BED_DIR/$ISLAND"
-python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE  -f $ISLANDS_BED_DIR/$ISLAND
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE -f $ISLANDS_BED_DIR/$ISLAND"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE  -f $ISLANDS_BED_DIR/$ISLAND
 
 
 
 echo ""
 echo ""
 echo "Calculate significance of candidate islands using the control library ..."
-echo "python $SICER/src/associate_tags_with_chip_and_control_w_fc_q.py -s $SPECIES  -a $OUTPUTDIR/$FILTEREDSAMPLEBED -b $OUTPUTDIR/$FILTEREDCONTROLBED -d $ISLANDS_BED_DIR/$ISLAND -f $FRAGMENT_SIZE -t $EFFECTIVEGENOME -o $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE"
-python $SICER/src/associate_tags_with_chip_and_control_w_fc_q.py -s $SPECIES  -a $OUTPUTDIR/$FILTEREDSAMPLEBED -b $OUTPUTDIR/$FILTEREDCONTROLBED -d $ISLANDS_BED_DIR/$ISLAND -f $FRAGMENT_SIZE -t $EFFECTIVEGENOME -o $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/associate_tags_with_chip_and_control_w_fc_q.py -s $SPECIES  -a $OUTPUTDIR/$FILTEREDSAMPLEBED -b $OUTPUTDIR/$FILTEREDCONTROLBED -d $ISLANDS_BED_DIR/$ISLAND -f $FRAGMENT_SIZE -t $EFFECTIVEGENOME -o $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/associate_tags_with_chip_and_control_w_fc_q.py -s $SPECIES  -a $OUTPUTDIR/$FILTEREDSAMPLEBED -b $OUTPUTDIR/$FILTEREDCONTROLBED -d $ISLANDS_BED_DIR/$ISLAND -f $FRAGMENT_SIZE -t $EFFECTIVEGENOME -o $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE
 
 echo ""
 echo ""
 echo "Identify significant islands using FDR criterion ..."
-#echo "python $SICER/src/find_significant_islands.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -q $FDR -o  $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS"
-#python $SICER/src/find_significant_islands.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -q $FDR -o  $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS
-echo "python $SICER/src/filter_islands_by_significance.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -p $FDR -c 7 -o $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS"
-python $SICER/src/filter_islands_by_significance.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -p $FDR -c 7 -o $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS
+#echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_significant_islands.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -q $FDR -o  $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS"
+#/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_significant_islands.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -q $FDR -o  $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filter_islands_by_significance.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -p $FDR -c 7 -o $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filter_islands_by_significance.py -i $ISLANDS_BED_DIR/$ISLANDSIGNIFICANCEFILE -p $FDR -c 7 -o $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS
 
 
 
 echo ""
 echo ""
 echo "Convert island summary to island bed file of format chr start end ChIP-read-count"
-echo "python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED"
-python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED
 
 
 echo ""
 echo ""
 echo "Filter reads with identified significant islands..."
-echo "python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
-python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
 
 
 echo ""
 echo ""
 echo "Make summary graph with filtered reads..."
-echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
 
 
 echo ""
 echo ""
 echo "Normalize summary graph with filtered reads for $SAMPLE by total island filtered reads per million..."
-echo "python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
-python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
 
 echo ""
 echo ""
