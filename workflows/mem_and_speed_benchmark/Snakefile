@@ -127,49 +127,47 @@ input_data_early = [f for f in input_data if re.search("0h|3h|15h|18h", f)]
 chip_data_0h = [f for f in chip_data if "0h" in f]
 input_data_0h = [f for f in input_data if "0h" in f]
 
+chip_data_0h_exp1 = [f for f in chip_data if "Exp1_0h" in f]
+input_data_0h_exp1 = [f for f in input_data if "Exp1_0h" in f]
 
-infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chip", "0h"): chip_data_0h,
-           ("input", "early"): input_data_early, ("input", "all"): input_data, ("input", "0h"): input_data_0h}
+infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chip", "0h"): chip_data_0h, ("chip", "0h_exp1"): chip_data_0h_exp1,
+           ("input", "early"): input_data_early, ("input", "all"): input_data, ("input", "0h"): input_data_0h, ("input", "0h_exp1"): input_data_0h_exp1}
 
 
 rule all:
     input:
-        "{prefix}/data/speed_epic_vs_SICER_memory.pdf".format(prefix=prefix),
-        expand("{prefix}/data/epic_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
-        expand("{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
+        expand("{prefix}/data/speed_epic2_vs_SICER_{bigwig}.{suffix}", prefix=prefix, bigwig="no_bigwig", suffix="png pdf".split())
+        # expand("{prefix}/data/{type}_epic2_vs_SICER_{bigwig}.pdf", prefix=prefix, bigwig="no_bigwig", type="memory speed".split())
+        # "{prefix}/data/speed_epic_vs_SICER_memory.pdf".format(prefix=prefix),
+        # expand("{prefix}/data/{caller}_results/{subset}/{bigwig}/memory.csv", subset="0h early all".split(), bigwig="no_bigwig", prefix=prefix, caller="sicer sicer2 macs2".split()), #  "all early".split()
+        # expand("{prefix}/data/speed_epic_vs_SICER_{bigwig}.pdf", prefix=prefix, bigwig="bigwig no_bigwig".split()),
+        # expand("{prefix}/data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
+        #        bigwig="bigwig no_bigwig".split(), subset="0h all early".split(), prefix=prefix),
+
+        # expand("{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv", subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
         # "{prefix}/data/file_sizes.csv".format(prefix=prefix),
         # "{prefix}/data/memory_usage.csv".format(prefix=prefix),
         # "{prefix}/data/speed_epic_vs_SICER.csv".format(prefix=prefix),
-        expand("{prefix}/data/speed_epic_vs_SICER_{bigwig}.pdf", prefix=prefix, bigwig="bigwig no_bigwig".split()),
-        expand("{prefix}/data/sicer_results/{subset}/{bigwig}/{subset}_chip-W200-G600-islands-summary-FDR1.0",
-               bigwig="bigwig no_bigwig".split(), subset="0h all early".split(), prefix=prefix),
         # expand("{prefix}/data/epic_results/{subset}/{bigwig}/fdr_list.csv",
         #        subset="0h all early".split(), bigwig="bigwig no_bigwig".split())
 
 
-rule run_epic:
+rule run_sicer2:
     input:
         chip = lambda w: infiles["chip", w.subset],
         input = lambda w: infiles["input", w.subset]
     output:
-        result = "{prefix}/data/epic_results/{subset}/{bigwig}/fdr_list.csv",
-        memory = "{prefix}/data/epic_results/{subset}/{bigwig}/memory.csv"
+        result = "{prefix}/data/sicer2_results/{subset}/{bigwig}/fdr_list.csv",
+        memory = "{prefix}/data/sicer2_results/{subset}/{bigwig}/memory.csv"
     resources:
         instances = 1
     threads: 48
     run:
-        # chip = [f for f in input if "Input" not in f]
-        # input = [f for f in input if "H3K27me3_Input" in f]
-
-        # overlaps_chip_input = set(chip).intersection(input)
-
-
-        # assert not overlaps_chip_input, "Overlapping files in chip and input!"
 
         if wildcards.bigwig == "bigwig":
             shell("/usr/bin/time -v -o {output.memory} epic -cpu 48 -bw data/epic_results -t {input.chip} -c {input.input} > {output.result}")
         else:
-            shell("/usr/bin/time -v -o {output.memory} epic -cpu 48 -t {input.chip} -c {input.input} > {output.result}")
+            shell("/usr/bin/time -v -o {output.memory} epic2 -kd -gn hg38 -t {input.chip} -c {input.input} -fdr 1 > {output.result}")
 
 
 from os.path import expanduser
@@ -198,8 +196,8 @@ rule concat_files_for_sicer:
         chip = lambda w: infiles["chip", w.subset],
         input = lambda w: infiles["input", w.subset]
     output:
-        chip = temp("{prefix}/data/{subset}_chip.bed"),
-        input = temp("{prefix}/data/{subset}_input.bed")
+        chip = "{prefix}/data/{subset}_chip.bed",
+        input = "{prefix}/data/{subset}_input.bed"
     resources:
         instances = 1
     run:
@@ -229,13 +227,13 @@ rule run_sicer:
             shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
         else:
             # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
-            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
+            shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.subset}_chip.bed {wildcards.subset}_input.bed {prefix}/data/sicer_results/{wildcards.subset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")
 
 
-bigwig = ["bigwig", "no_bigwig"] #
+bigwig = ["no_bigwig"] # "bigwig",
 rule memory_comparisons:
     input:
-        epic = expand("{prefix}/data/epic_results/{subset}/{bigwig}/memory.csv",
+        sicer2 = expand("{prefix}/data/sicer2_results/{subset}/{bigwig}/memory.csv",
                        subset="0h all early".split(), bigwig=bigwig, prefix=prefix),
         sicer = expand("{prefix}/data/sicer_results/{subset}/{bigwig}/memory.csv",
                        subset="0h all early".split(), bigwig=bigwig, prefix=prefix),
@@ -245,7 +243,7 @@ rule memory_comparisons:
         "{prefix}/data/memory_usage.csv"
     run:
         results = []
-        for f in input.sicer + input.epic + input.macs2:
+        for f in input.sicer + input.sicer2 + input.macs2:
             print(f)
             software, files, bigwig = f.split("/")[-4:-1]
 
@@ -262,7 +260,7 @@ rule memory_comparisons:
                         hours, minutes, seconds = 0, time_split[0], time_split[1]
                     elif len(time_split) == 3:
                         hours, minutes, seconds = time_split
-                    minutes = int(hours) * 60 + int(minutes)
+                    minutes = int(hours) * 60 + int(minutes) + float(seconds)/60
 
             results.append({"Software": software, "Files": files,
                             "Bigwig": bigwig, "MaxRSSGB": gb,
@@ -301,14 +299,44 @@ rule get_file_sizes:
         df.to_csv(output[0], sep=" ", index=False)
 
 
+rule get_line_nbs:
+    output:
+        "{prefix}/data/file_linenb.csv"
+    run:
+
+        all_sum = 0
+        for f in chip_data + input_data:
+            for line in open(f):
+                all_sum += 1
+
+        print("read all lines")
+        early_sum = 0
+        for f in chip_data_early + input_data_early:
+            for line in open(f):
+                early_sum += 1
+
+        print("read early lines")
+        h0_sum = 0
+        for f in chip_data_0h + input_data_0h:
+            for line in open(f):
+                h0_sum += 1
+
+        print("read h0 lines")
+        df = pd.concat([pd.Series([h0_sum, early_sum, all_sum]), pd.Series(["0h", "early", "all"])], axis=1)
+
+        df.columns = ["Intervals", "Files"]
+        df.to_csv(output[0], sep=" ", index=False)
+
+
 rule graph_speed_epic_vs_SICER:
     input:
-        memory = "{prefix}/data/memory_usage.csv", file_size = "{prefix}/data/file_sizes.csv"
+        memory = "{prefix}/data/memory_usage.csv", file_size = "{prefix}/data/file_linenb.csv"
     output:
-        "{prefix}/data/speed_epic_vs_SICER_{bigwig}.csv"
+        "{prefix}/data/speed_epic2_vs_SICER_{bigwig}.csv"
     run:
         mem_df = pd.read_table(input.memory, sep=" ")
         print(mem_df)
+        print(wildcards.bigwig)
         mem_df = mem_df.loc[mem_df.Bigwig == wildcards.bigwig].drop("Bigwig", axis=1)
         print(mem_df)
 
@@ -321,47 +349,43 @@ rule graph_speed_epic_vs_SICER:
 
         df = mem_df.merge(size_df, how="left", on="Files")
 
-        df.loc[:, "Software"] = df.Software.str.replace("epic_results", "epic").replace("sicer_results", "SICER").replace("macs2_results", "macs2")
+        df.loc[:, "Software"] = df.Software.str.replace("sicer2_results", "epic2").replace("sicer_results", "SICER").replace("macs2_results", "MACS2")
 
         df.to_csv(output[0], sep=" ")
 
 
 rule graph_epic_and_sicer_speeds_together:
     input:
-        "{prefix}/data/speed_epic_vs_SICER_{bigwig}.csv"
+        "{prefix}/data/speed_epic2_vs_SICER_{bigwig}.csv"
     output:
-        "{prefix}/data/speed_epic_vs_SICER_{bigwig}.pdf"
+        "{prefix}/data/speed_epic2_vs_SICER_{bigwig}.{suffix}"
     script:
         "scripts/epic_speed.R"
 
-    # run:
-    #     command = """
-    #     library(ggplot2)
-
-    #     df = read.table("{input}", sep=" ", header=1)
-    #     df$Size = round(df$Size, 2)
-
-    #     linear = ggplot(df, aes(x=Size, y=Minutes)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Running time in minutes.")
-    #     ggsave("{output[0]}")"""
-
-    #     print(command)
-    #     R(command)
 
 
 # rule graph_epic_and_sicer_memory_usage_together:
 #     input:
-#         "{prefix}/data/speed_epic_vs_SICER.csv"
+#         "{prefix}/data/speed_epic2_vs_SICER_{bigwig}.csv"
 #     output:
-#         "{prefix}/data/speed_epic_vs_SICER_memory.pdf"
+#         "{prefix}/data/memory_epic2_vs_SICER_{bigwig}.pdf"
+#     script:
+#         "scripts/epic_memory.R"
+
+
+# rule run_sicer2:
+#     input:
+#         chip = lambda w: infiles["chip", w.subset],
+#         input = lambda w: infiles["input", w.subset]
+#     output:
+#         result = "{prefix}/data/sicer2_results/{subset}/{bigwig}/fdr_list.csv",
+#         memory = "{prefix}/data/sicer2_results/{subset}/{bigwig}/memory.csv"
+#     resources:
+#         instances = 1
+#     threads: 48
 #     run:
-#         command = """
-#         library(ggplot2)
 
-#         df = read.table("{input}", sep=" ", header=1)
-#         df$Size = round(df$Size, 2)
-
-#         linear = ggplot(df, aes(x=Size, y=MaxRSSGB)) + geom_line(aes(colour=Software)) + geom_point(aes(colour=Software)) + xlab("Size of data in GB.") + ylab("Memory usage.")
-#         ggsave("{output[0]}")"""
-
-#         print(command)
-#         R(command)
+#         if wildcards.bigwig == "bigwig":
+#             shell("/usr/bin/time -v -o {output.memory} epic -cpu 48 -bw data/epic_results -t {input.chip} -c {input.input} > {output.result}")
+#         else:
+#             shell("/usr/bin/time -v -o {output.memory} epic2 -t {input.chip} -c {input.input} > {output.result}")

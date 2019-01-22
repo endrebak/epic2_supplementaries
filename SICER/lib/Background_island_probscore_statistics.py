@@ -2,7 +2,7 @@
 # Authors: Weiqun Peng
 #
 # Disclaimer
-# 
+#
 # This software is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -15,7 +15,7 @@
 
 
 import re, os, sys, shutil
-from math import *   
+from math import *
 from string import *
 from optparse import OptionParser
 import bisect
@@ -26,16 +26,18 @@ class Background_island_probscore_statistics:
 	#  only look at enrichment!
 	def __init__(self, total_tags, windowSize, gapSize, window_pvalue, genomeLength, bin_size):
 		self.tag_density = total_tags * 1.0 / genomeLength;
-		self.window_size = windowSize; # In bps. 
+		self.window_size = windowSize; # In bps.
 		assert(gapSize%windowSize == 0); # gap is in bps
-		self.gap_size = gapSize/windowSize; # maximum number of windows allowed in a gap 
+		self.gap_size = gapSize/windowSize; # maximum number of windows allowed in a gap
 		self.genome_length = int(ceil(float(genomeLength)/windowSize));
 		self.average = self.tag_density * windowSize;
 		self.bin_size = bin_size;
-		
-		# Precalculate the poisson, cumulative poisson values up to max (500, 2*self.average) . 
+
+		# Precalculate the poisson, cumulative poisson values up to max (500, 2*self.average) .
+		print "self.average", self.average
 		self.max_index = max (500, int(2*self.average)) ;
-		#print self.average, self.max_index; 
+		print "self.max_index", self.max_index
+		#print self.average, self.max_index;
 		#self.fact=[];
 		self.poisson_value=[];
 		self.window_score=[];
@@ -47,8 +49,8 @@ class Background_island_probscore_statistics:
 			if ( index < self.average): # only want to look at enrichment
 				self.window_score.append(0);
 				self.window_scaled_score.append(0);
-			else:	
-				if prob > 0:		
+			else:
+				if prob > 0:
 					self.window_score.append(-log(prob));
 					#scaled_score =int(-log(prob)/self.bin_size);
 					scaled_score =int(round(-log(prob)/self.bin_size))
@@ -59,27 +61,35 @@ class Background_island_probscore_statistics:
 					self.window_scaled_score.append(scaled_score);
 			#print index, self.poisson_value[index], self.window_score[index];
 		self.max_index = len(self.poisson_value);
-		#print "max_index ", self.max_index;			
+		#print "max_index ", self.max_index;
 		# gap_contribution needs min_tags_in_window
 		# So the position of this line is critical.
 		self.min_tags_in_window = 0;
 		sf = 1 ;
+
+		print("self.average=", self.average)
+		print("self.poisson_value[0]=", self.poisson_value[0])
+		print("window_pvalue", window_pvalue)
 		#print "self.poisson_value[0]=", self.poisson_value[0];
 		while (sf > window_pvalue ):
 			#print self.min_tags_in_window, sf;
+			print("poisson", self.min_tags_in_window, self.poisson_value[self.min_tags_in_window])
 			sf -= self.poisson_value[self.min_tags_in_window]
 			self.min_tags_in_window += 1;
-		#An alternative approach that uses the scipy package, 
+		#An alternative approach that uses the scipy package,
 		#poisson.sf (n, lambda) = \sum_{i= n+1}^{\infty} p(i, lambda)
 		#self.min_tags_in_window = int(self.average);
 		#while (scipy.stats.poisson.sf(self.min_tags_in_window-1) > window_pvalue):
 		#	self.min_tags_in_window += 1;
-		
+
 		#print "Window read count threshold: ", self.min_tags_in_window;
-		
+
 		self.gap_contribution = self.gap_factor();
 		self.boundary_contribution = self.boundary();
-		
+
+		print("self.gap_contribution", self.gap_contribution)
+		print("self.boundary_contribution", self.boundary_contribution)
+
 		self.cumulative=[];
 		# new method, first fill the lowest score.
 		prob = self.boundary_contribution * self.poisson_value[self.min_tags_in_window];
@@ -87,16 +97,22 @@ class Background_island_probscore_statistics:
 		#scaled_score = int(score/self.bin_size);
 		scaled_score = int(round(score/self.bin_size));
 		self.island_expectation =[0] * (scaled_score+1);
+
+		print("island_expectation length", (scaled_score+1))
 		self.island_expectation[scaled_score] = prob*self.genome_length;
+		print("self.island_expectation[scaled_score]", self.island_expectation[scaled_score])
+		print("scaled_score", scaled_score)
+
 # 		if len(self.island_expectation) < scaled_score:
 # 			self.island_expectation += [0] *(scaled_score-len(self.island_expectation)+1);
 # 			self.island_expectation[scaled_score] = prob*self.genome_length;
 		# initial condition
 		self.island_expectation[0] = self.boundary_contribution*self.genome_length/self.gap_contribution;
-		
+
+
 		self.root = self.find_asymptotics_exponent();
-		#print "Exponent for Asymptotics: ", self.root;	
-				
+		#print "Exponent for Asymptotics: ", self.root;
+
 	def factorial(self, m):
 		value = 1.0;
 		if m != 0:
@@ -108,7 +124,7 @@ class Background_island_probscore_statistics:
 
 	# Return the log of a factorial, using Srinivasa Ramanujan's approximation
 	def factln(self, m):
-		if m<20:  
+		if m<20:
 			value = 1.0;
 			if m != 0:
 				while m != 1:
@@ -125,16 +141,16 @@ class Background_island_probscore_statistics:
 		else:
 			exponent = -average + i*log(average) - self.factln(i);
 			return exp(exponent);
-	
+
 	"""
 		gap is in the unit of windows. In each window in the gap, the
 		window could have 0, 1, min_tags_in_windows-1 tags.
-		
+
 		say gap = 1, min_tags_in_window= 2, gap_factor = 1 +
 		poission(0,a) + poisson(1, a), where 1 represents no gap,
-		poisson(0,a) represents a window with 0 tag, 
+		poisson(0,a) represents a window with 0 tag,
 		poisson(1,a) represents a window with 1 tag,
-		
+
 		The gap contribution from each window is not independent
 	"""
 	def single_gap_factor(self):
@@ -145,7 +161,7 @@ class Background_island_probscore_statistics:
 
 	# gap contribution is bigger than 1
 	def gap_factor(self):
-		if self.gap_size == 0: 
+		if self.gap_size == 0:
 			return 1;
 		else:
 			i = 1;
@@ -160,9 +176,9 @@ class Background_island_probscore_statistics:
 		unqualified windows longer than gap
 		"""
 		temp = self.single_gap_factor();
-		temp = pow(temp, self.gap_size+1); 
-		return temp*temp; # start & end 
-	
+		temp = pow(temp, self.gap_size+1);
+		return temp*temp; # start & end
+
 	#forward method that memorize the calculated results.
 	def background_island_expectation (self, scaled_score):
 		current_max_scaled_score = len(self.island_expectation)-1;
@@ -181,7 +197,7 @@ class Background_island_probscore_statistics:
 				self.island_expectation.append(temp);
 				#print index, temp, self.island_expectation[index];
 		return self.island_expectation[scaled_score];
-			
+
 
 	def generate_cumulative_dist(self,  outfile=""):
 		"""
@@ -193,7 +209,7 @@ class Background_island_probscore_statistics:
 			complimentary = len(self.island_expectation) - index;
 			partial_sum += self.island_expectation[complimentary]; # The end is outside of the index
 			self.cumulative[complimentary]=partial_sum;
-			
+
 		if outfile != "":
 			fixpoint = int(len(self.island_expectation)/2);
 			outf = open(outfile, "w");
@@ -204,13 +220,13 @@ class Background_island_probscore_statistics:
 				#outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]) + "\t" + str(self.cumulative[fixpoint] * exp(-self.root*(self.cumulative[index]-self.cumulative[fixpoint]))) + "\n";
 				outf.write(outline);
 			outf.close();
-				
-				
+
+
 	def find_island_threshold(self, e_value_threshold):
 		"""
 		average is the average number of tags in a window:
 		opt.tag_density * opt.window_size
-		
+
 		This one allows single-window islands.
 		Returns the island threshold
 		"""
@@ -232,31 +248,31 @@ class Background_island_probscore_statistics:
 				partial_cumu = sum(self.island_expectation)
 			#for index in  xrange(len(self.island_expectation)):
 					#print  index*self.bin_size, self.island_expectation[index];
-		
+
 		self.generate_cumulative_dist();
 		for index in xrange(len(self.cumulative)):
 			if self.cumulative[index]<=e_value_threshold:
 				score_threshold = index*self.bin_size;
 				break;
 		return score_threshold;
-	
+
 	def output_distribution(self, outputfile=""):
-		
+
 		fixpoint = int(len(self.cumulative)/4);
 		#print fixpoint, self.cumulative[fixpoint];
 		outline ="# Score" + "\t" + "Expect # islands" +"\t" + "Cumulative # Islands" + "\t" + "Asymptotics"+ "\n";
 		if outputfile == "":
 			print outline;
 			for index in xrange(len(self.cumulative)-1):
-				#outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]); 
+				#outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]);
 				outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]) + "\t" + str(self.cumulative[fixpoint] * exp(-self.root*(self.cumulative[index]-self.cumulative[fixpoint]))) + "\n";
-				print outline;	
+				print outline;
 		else:
-			
+
 			output=open(outputfile, "w")
 			output.write(outline);
 			for index in xrange(len(self.cumulative)-1):
-				#outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]) + "\n"; 
+				#outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]) + "\n";
 				outline = str(index * self.bin_size) + "\t" + str(self.island_expectation[index])+ "\t" +str(self.cumulative[index]) + "\t" + str(self.cumulative[fixpoint] * exp(-self.root*(index - fixpoint)* self.bin_size)) + "\n";
 				output.write(outline);
 			output.close();
@@ -291,7 +307,7 @@ class Background_island_probscore_statistics:
 				f1, f2 = f(x1), f(x2)
 			return (x1, x2), (f1, f2)
 		raise BracketingException("too many iterations")
-		
+
 	# based on Numerical Recipes, p. 354
 	def bisect_root(self, func, interval, xacc):
 		JMAX=50;
@@ -299,13 +315,13 @@ class Background_island_probscore_statistics:
 		f=func(x1);
 		fmid=func(x2);
 		if (f*fmid >= 0.0): print "Root must be bracketed for bisection";
-		if (f < 0.0): 
+		if (f < 0.0):
 			dx= x2 - x1;
 			rtb= x1;
 		else:
 			dx= x1 - x2;
-			rtb= x2;	
-		for  j in xrange(JMAX):	
+			rtb= x2;
+		for  j in xrange(JMAX):
 			dx *= 0.5;
 			xmid= rtb + dx;
 			fmid=func(xmid);
@@ -313,7 +329,7 @@ class Background_island_probscore_statistics:
 			if (fabs(dx) < xacc or fmid == 0.0): return rtb;
 		print "Too many bisections";
 		return 0.0;
-			
+
 	def find_asymptotics_exponent(self, xacc=.00001):
 		num = 100;
 		#for index in xrange(num):
@@ -329,10 +345,10 @@ def main(argv):
 	parser = OptionParser();
 	parser.add_option("-e", "--e_value_threshold", action="store", type="float",
 			  dest="e_value_threshold", help="e_value_threshold",
-			  metavar="<float>") 
+			  metavar="<float>")
 	parser.add_option("-t", "--tag_counts", action="store", type="float",
 			  dest="tag_counts", help="tag counts from experimental data",
-			  metavar="<float>") 
+			  metavar="<float>")
 	parser.add_option("-w", "--window_size", action="store", type="int",
 			  dest="window_size", help="window size in bp to make summary",
 			  metavar="<int>")
@@ -344,7 +360,7 @@ def main(argv):
 			  metavar="<float>")
 	parser.add_option("-l", "--genome_length", action="store", type="float",
 			  dest="genome_length", help="effective genome length in bp",
-			  metavar="<float>") 
+			  metavar="<float>")
 	parser.add_option("-b", "--bin_size", action="store", type="float",
 			  dest="bin_size", help="bin size for score histogram",
 			  metavar="<float>")
@@ -356,10 +372,10 @@ def main(argv):
 
 	tag_density = opt.tag_counts/opt.genome_length;
 	background = Background_island_probscore_statistics(opt.tag_counts, opt.window_size, opt.gap_size, opt.window_pvalue, opt.genome_length, opt.bin_size);
-	score_threshold = background.find_island_threshold(opt.e_value_threshold); 
+	score_threshold = background.find_island_threshold(opt.e_value_threshold);
 	#background.output_distribution();
 	background.output_distribution(opt.outfile);
-	
+
 	print "# Tag count : ", opt.tag_counts;
 	print "# Genome length: " + str(opt.genome_length) + " or " + str(int(opt.genome_length/opt.window_size)) + " windows";
 	print "# Average number of reads in a window: ",  tag_density * opt.window_size;
@@ -368,8 +384,8 @@ def main(argv):
 	print "# Gap size: " + str(opt.gap_size) + " bps" ;
 	print "# Chosen e value threshold: " + str(opt.e_value_threshold);
 	print "# score threshold: " + str(score_threshold);
-	
-	
-	
+
+
+
 if __name__ == "__main__":
     	main(sys.argv)

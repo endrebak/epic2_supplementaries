@@ -85,11 +85,16 @@ def find_threshold(pvalue, average):
 	"""
 	value = 1;
 	index = 0;
+	raise
 	value -= poisson(index, average);
+	print("first value", value)
+	print("pvalue", pvalue)
 	while value > pvalue:
+		print("value", value)
 		index += 1;
 		value -= poisson(index, average);
 	# index I is the value of which 1-P(0)-P(1)-...-P(I) < pvalue
+	print("last index", index)
 	return index+1;
 
 
@@ -131,6 +136,15 @@ def combine_proximal_islands(islands, gap, window_size_buffer=3):
 				else:
 					Final_islands.append (current_island);
 					current_island = islands[index];
+
+				# if islands[index].chrom == "chr1" and islands[index].start in [36532800, 36533000, 36533200, 36533400, 36533600, 36533800, 36534000, 36534200, 36534400, 36534600, 36534800, 36535000]:
+				# 	print(dist)
+				# 	print(current_island.chrom)
+				# 	print(current_island.start)
+				# 	print(current_island.end)
+				# 	print(current_island.value)
+				# 	print(Final_islands[-1].value)
+				# 	print("----")
 			# The last island:
 			Final_islands.append (current_island);
 	#print len(Final_islands);
@@ -197,16 +211,22 @@ def main(argv):
 		average = float(total_read_count) * opt.window_size/genome_length;
 		print "Effective genome Length: ", genome_length;
 		print "Window average:", average;
+		print "opt.evalue:", opt.evalue;
 
 		window_pvalue = 0.20;
 		bin_size = 0.001;
+		print "Total read count:", total_read_count;
+		print "window_size:", opt.window_size;
+		print "opt.gap:", opt.gap;
 		print "Window pvalue:", window_pvalue;
+		print "genome_length:", genome_length;
 		background = Background_island_probscore_statistics.Background_island_probscore_statistics(total_read_count, opt.window_size, opt.gap, window_pvalue, genome_length, bin_size);
 		min_tags_in_window = background.min_tags_in_window
 		print "Minimum num of tags in a qualified window: ", min_tags_in_window
 
 		print "Generate the enriched probscore summary graph and filter the summary graph to get rid of ineligible windows ";
 		#read in the summary graph file
+		print "opt.summarygraph " * 5 + opt.summarygraph;
 		bed_val = BED.BED(opt.species, opt.summarygraph, "BED_GRAPH");
 
 		#generate the probscore summary graph file, only care about enrichment
@@ -219,6 +239,8 @@ def main(argv):
 				filtered_bed_val [chrom]= [];
 				for index in xrange(len(bed_val[chrom])):
 					read_count = bed_val[chrom][index].value;
+					# if chrom == "chr1" and bed_val[chrom][index].start in [36532800, 36533000, 36533200, 36533400, 36533600, 36533800, 36534000, 36534200, 36534400, 36534600, 36534800, 36535000]:
+					# 	print("read_count", read_count, "start", bed_val[chrom][index].start)
 					if ( read_count < min_tags_in_window):
 						score = -1;
 						#score = 0;
@@ -241,6 +263,7 @@ def main(argv):
 		print "Determine the score threshold from random background";
 		#determine threshold from random background
 		hist_outfile="L" + str(genome_length) + "_W" +str(opt.window_size) + "_G" +str(opt.gap) +  "_s" +str(min_tags_in_window) + "_T"+ str(total_read_count) + "_B" + str(bin_size) +"_calculatedprobscoreisland.hist";
+		print "opt.evalue", opt.evalue;
 		score_threshold = background.find_island_threshold(opt.evalue);
 		# background.output_distribution(hist_outfile);
 		print "The score threshold is: ", score_threshold;

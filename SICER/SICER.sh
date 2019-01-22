@@ -164,46 +164,46 @@ NORMALIZEDISLANDFILTEREDSUMMARY=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandf
 # This file stores normalized summary graph made by the island-filtered non-redundant raw reads in wig vstep format
 NORMALIZEDISLANDFILTEREDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered-normalized.wig
 
-echo " "
-echo " "
-echo "Preprocess the raw $SAMPLE file to remove redundancy with threshold $CHIPTHRESHOLD..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED
+# echo " "
+# echo " "
+# echo "Preprocess the raw $SAMPLE file to remove redundancy with threshold $CHIPTHRESHOLD..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $CHIPTHRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED
 
-echo " "
-echo " "
-echo "Preprocess the raw $CONTROL file to remove redundancy with threshold $CONTROLTHRESHOLD..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED
+# echo " "
+# echo " "
+# echo "Preprocess the raw $CONTROL file to remove redundancy with threshold $CONTROLTHRESHOLD..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $CONTROLDIR/$CONTROL.bed -t $CONTROLTHRESHOLD -o $OUTPUTDIR/$FILTEREDCONTROLBED
 
 
-echo " "
-echo " "
-echo "Partion the genome in windows ..."
-echo "Generate summary files ..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
-
-echo ""
-echo ""
-echo "Normalize summary graph by total island filtered reads per million for $SAMPLE ..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
+# echo " "
+# echo " "
+# echo "Partion the genome in windows ..."
+# echo "Generate summary files ..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
 
 # echo ""
 # echo ""
-# echo "Convert the normalized summary graph into wig vstep format..."
-# echo "sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
-# sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE
+# echo "Normalize summary graph by total island filtered reads per million for $SAMPLE ..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
+#
+# # echo ""
+# # echo ""
+# # echo "Convert the normalized summary graph into wig vstep format..."
+# # echo "sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
+# # sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE
+#
+# # rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
-# rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
-
-echo " "
-echo " "
-echo "Find candidate islands exhibiting clustering ..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE -f $ISLANDS_BED_DIR/$ISLAND"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE  -f $ISLANDS_BED_DIR/$ISLAND
+# echo " "
+# echo " "
+# echo "Find candidate islands exhibiting clustering ..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE -f $ISLANDS_BED_DIR/$ISLAND"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE  -f $ISLANDS_BED_DIR/$ISLAND
 
 
 
