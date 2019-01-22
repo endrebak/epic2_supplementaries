@@ -1,0 +1,24 @@
+from subprocess import check_output
+
+rule concat_files:
+    input:
+        expand("{{chip}}_{sample}_keratinocyte.bed.gz", sample="1 2 3".split())
+    output:
+        "data/{chip}.bed"
+    shell:
+        "zcat {input} > {output[0]}"
+
+
+rule run_sicer:
+    input:
+        chip = "data/ChIP.bed",
+        input = "data/Input.bed"
+    output:
+        result = "data/sicer_results/chip-W200-G600-islands-summary-FDR1.0",
+        # memory = "{prefix}/data/sicer_results/{subset}/{bigwig}/memory.csv",
+    resources:
+        instances = 1
+    run:
+        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
+
+        shell("sh ../../SICER/SICER.sh data/ ChIP.bed Input.bed data/sicer_results/ hg38 1 200 150 0.85 600 1.0 {pwd}")

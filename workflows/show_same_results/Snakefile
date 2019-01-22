@@ -1,0 +1,109 @@
+"""Show that epic2 and SICER gives approximately the same results."""
+
+__author__ = "Endre Bakken Stovner https://github.com/endrebak/"
+__license__ = "MIT"
+
+from glob import glob
+from os import environ
+from subprocess import check_output
+
+import pandas as pd
+
+if not environ.get("TMUX", ""):
+    raise Exception("Not using TMUX!")
+
+
+shell.executable("bash")
+
+prefix = "/mnt/scratch/projects/epic_same_results"
+
+sample_sheet = pd.read_table("sample_sheet.txt", sep=" ", header=0, index_col=None)
+ss = sample_sheet
+# datasets = {
+
+#     "test": {"chip": https://github.com/biocore-ntnu/epic2/raw/master/examples/test.bed,
+#              "input": https://github.com/biocore-ntnu/epic2/raw/master/examples/control.bed}
+
+# }
+print(ss)
+datasets = set(ss.Dataset)
+files = set(ss.File)
+
+wildcard_constraints:
+    chip = "(chip|input)",
+    dataset = "({})".format("|".join(datasets)),
+    name = "({})".format("|".join(files)),
+
+
+rule all:
+    input:
+        expand("{prefix}/data/sicer2_results/{dataset}/fdr_list.csv", prefix=prefix, dataset=datasets)
+
+
+
+def getfromss(w):
+
+    print(dict(w))
+    print(ss)
+
+    return ss[(ss.Type == w.chip) & (ss.Dataset == w.dataset) & (ss.Name == w.name)].File.iloc[0]
+
+
+rule download:
+    output:
+        "{prefix}/data/download/{dataset}/{chip}/{name}"
+    params:
+        f = getfromss
+    shell:
+        "curl {params.f} > {output[0]}"
+
+
+def getfiles(w, chip):
+    f = list(ss[(ss.Type == chip) & (ss.Dataset == w.dataset)].Name)
+    return f
+
+
+
+rule run_sicer2:
+    input:
+        chip = lambda w: expand("{prefix}/data/download/{dataset}/{chip}/{name}", prefix=w.prefix, dataset=w.dataset, chip="chip", name=getfiles(w, "chip")),
+        input = lambda w: expand("{prefix}/data/download/{dataset}/{chip}/{name}", prefix=w.prefix, dataset=w.dataset, chip="input", name=getfiles(w, "input"))
+    output:
+        result = "{prefix}/data/sicer2_results/{dataset}/fdr_list.csv",
+        memory = "{prefix}/data/sicer2_results/{dataset}/memory.csv"
+    resources:
+        instances = 1
+    threads: 48
+    shell:
+        "/usr/bin/time -v -o {output.memory} epic2 -kd -gn hg38 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
+
+
+
+rule concat_files_for_sicer:
+    input:
+        chip = lambda w: infiles["chip", w.dataset],
+        input = lambda w: infiles["input", w.dataset]
+    output:
+        chip = "{prefix}/data/{dataset}_chip.bed",
+        input = "{prefix}/data/{dataset}_input.bed"
+    resources:
+        instances = 1
+    run:
+        shell("cat {input.chip} > {output.chip}")
+        shell("cat {input.input} > {output.input}")
+
+
+rule run_sicer:
+    input:
+        chip = "{prefix}/data/{dataset}_chip.bed",
+        input = "{prefix}/data/{dataset}_input.bed"
+    output:
+        result = "{prefix}/data/sicer_results/{dataset}/{dataset}_chip-W200-G600-islands-summary-FDR1.0",
+        memory = "{prefix}/data/sicer_results/{dataset}/memory.csv",
+    resources:
+        instances = 1
+    run:
+        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
+
+        # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+        shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}")

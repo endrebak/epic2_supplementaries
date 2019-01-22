@@ -1,0 +1,3 @@
+Dataset Type Name File
+test chip chip.bed https://raw.githubusercontent.com/biocore-ntnu/epic2/master/examples/test.bed
+test input control.bed https://raw.githubusercontent.com/biocore-ntnu/epic2/master/examples/control.bed

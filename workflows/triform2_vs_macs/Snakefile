@@ -1,0 +1,260 @@
+"""Measure difference in memory usage for SICER and epic.
+
+Use H3K27me3 data in early S-phase (0, 3, 15, 18)
+"""
+
+__author__ = "Endre Bakken Stovner https://github.com/endrebak/"
+__license__ = "MIT"
+
+from glob import glob
+from os import environ
+from subprocess import check_output
+
+import pandas as pd
+
+if not environ.get("TMUX", ""):
+    raise Exception("Not using TMUX!")
+
+
+shell.executable("bash")
+
+prefix = "/mnt/scratch/projects/triform2_bencmarks"
+
+wildcard_constraints:
+    suffix = "(png|pdf)"
+
+chip_data = ['/mnt/scratch/projects/epipp/data/bam/Exp1_0h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_12h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_15h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_18h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_21h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_24h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_3h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_6h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_9h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp1_Unsynchronized_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_0h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_12h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_15h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_18h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_21h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_24h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_3h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_6h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_9h_PolII.bed',
+             '/mnt/scratch/projects/epipp/data/bam/Exp2_Unsynchronized_PolII.bed']
+
+
+input_data = ['/mnt/scratch/projects/epipp/data/bam/Exp1_0h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_12h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_15h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_18h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_21h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_24h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_3h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_6h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_9h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp1_Unsynchronized_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_0h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_12h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_15h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_18h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_21h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_24h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_3h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_6h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_9h_Input.bed',
+              '/mnt/scratch/projects/epipp/data/bam/Exp2_Unsynchronized_Input.bed']
+
+
+chip_data_early = [f for f in chip_data if re.search("0h|3h|15h|18h", f)]
+input_data_early = [f for f in input_data if re.search("0h|3h|15h|18h", f)]
+
+chip_data_0h = [f for f in chip_data if "0h" in f]
+input_data_0h = [f for f in input_data if "0h" in f]
+
+chip_data_0h_exp1 = [f for f in chip_data if "Exp1_0h" in f]
+input_data_0h_exp1 = [f for f in input_data if "Exp1_0h" in f]
+
+infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chip", "0h"): chip_data_0h, ("chip", "0h_exp1"): chip_data_0h_exp1,
+           ("input", "early"): input_data_early, ("input", "all"): input_data, ("input", "0h"): input_data_0h, ("input", "0h_exp1"): input_data_0h_exp1}
+
+
+f = "{prefix}/data/speed_triform2_vs_MACS2.{suffix}"
+rule all:
+    input:
+        expand(f, prefix=prefix, suffix="png pdf".split())
+
+
+rule old_triform:
+    input:
+        chip = lambda w: infiles["chip", w.subset],
+        input = lambda w: infiles["input", w.subset]
+    output:
+        result = "{prefix}/data/triform_results/{subset}/{bigwig}/fdr_list.csv",
+        memory = "{prefix}/data/triform_results/{subset}/{bigwig}/memory.csv"
+    resources:
+        instances = 1
+    threads: 48
+    shell:
+        "/usr/bin/time -v -o {output.memory} tf2 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
+
+
+rule run_triform2:
+    input:
+        chip = lambda w: infiles["chip", w.subset],
+        input = lambda w: infiles["input", w.subset]
+    output:
+        result = "{prefix}/data/triform2_results/{subset}/{bigwig}/fdr_list.csv",
+        memory = "{prefix}/data/triform2_results/{subset}/{bigwig}/memory.csv"
+    resources:
+        instances = 1
+    threads: 48
+    shell:
+            "/usr/bin/time -v -o {output.memory} triform2 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
+
+
+from os.path import expanduser
+python2_bin = expanduser("/mnt/work/endrebak/software/anaconda/envs/py27/bin/")
+macs2_bin = "/mnt/work/endrebak/software/anaconda/envs/py27/bin/macs2"
+rule run_macs2:
+    input:
+        chip = lambda w: infiles["chip", w.subset],
+        input = lambda w: infiles["input", w.subset]
+    output:
+        memory = "{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv"
+    resources:
+        instances = 1
+    run:
+        "/usr/bin/time -v -o {output.memory} {macs2_bin} callpeak --broad --broad-cutoff 0.05 --gsize hs -q 1 -t {input.chip} -c {input.input} -n {prefix}/data/macs2_results/{wildcards.subset}/{wildcards.bigwig}/"
+
+
+
+
+bigwig = ["no_bigwig"] # "bigwig",
+rule memory_comparisons:
+    input:
+        triform2 = expand("{prefix}/data/triform2_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig=bigwig, prefix=prefix),
+        triform = expand("{prefix}/data/triform_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig=bigwig, prefix=prefix),
+        macs2 = expand("{prefix}/data/macs2_results/{subset}/{bigwig}/memory.csv",
+                       subset="0h all early".split(), bigwig="no_bigwig", prefix=prefix),
+    output:
+        "{prefix}/data/memory_usage.csv"
+    run:
+        results = []
+        for f in input.sicer + input.sicer2 + input.macs2:
+            print(f)
+            software, files, bigwig = f.split("/")[-4:-1]
+
+            for line in open(f):
+
+                if "Maximum resident set size (kbytes):" in line:
+                    gb = int(line.split(": ")[-1]) / 1e6
+
+                elif "Elapsed (wall clock) time" in line:
+                    time = line.split(": ")[-1].strip()
+                    time_split = time.split(":")
+
+                    if len(time_split) == 2:
+                        hours, minutes, seconds = 0, time_split[0], time_split[1]
+                    elif len(time_split) == 3:
+                        hours, minutes, seconds = time_split
+                    minutes = int(hours) * 60 + int(minutes) + float(seconds)/60
+
+            results.append({"Software": software, "Files": files,
+                            "Bigwig": bigwig, "MaxRSSGB": gb,
+                            "Minutes": minutes})
+
+        results = pd.DataFrame.from_dict(results)[
+            ["Software", "Files", "Bigwig", "MaxRSSGB", "Minutes"]]
+
+        results = results.sort_values(["Files", "Bigwig", "Software"])
+
+        print(results)
+
+        results.to_csv(output[0], sep=" ", index=False)
+
+
+rule get_file_sizes:
+    output:
+        "{prefix}/data/file_sizes.csv"
+    run:
+        all_sum = 0
+        for f in chip_data + input_data:
+            all_sum += float(os.stat(f).st_size/(1024*1024*1024))
+
+        early_sum = 0
+        for f in chip_data_early + input_data_early:
+            early_sum += float(os.stat(f).st_size/(1024*1024*1024))
+
+
+        h0_sum = 0
+        for f in chip_data_0h + input_data_0h:
+            h0_sum += float(os.stat(f).st_size/(1024*1024*1024))
+
+        df = pd.concat([pd.Series([h0_sum, early_sum, all_sum]), pd.Series(["0h", "early", "all"])], axis=1)
+
+        df.columns = ["Size", "Files"]
+        df.to_csv(output[0], sep=" ", index=False)
+
+
+rule get_line_nbs:
+    output:
+        "{prefix}/data/file_linenb.csv"
+    run:
+
+        all_sum = 0
+        for f in chip_data + input_data:
+            for line in open(f):
+                all_sum += 1
+
+        print("read all lines")
+        early_sum = 0
+        for f in chip_data_early + input_data_early:
+            for line in open(f):
+                early_sum += 1
+
+        print("read early lines")
+        h0_sum = 0
+        for f in chip_data_0h + input_data_0h:
+            for line in open(f):
+                h0_sum += 1
+
+        print("read h0 lines")
+        df = pd.concat([pd.Series([h0_sum, early_sum, all_sum]), pd.Series(["0h", "early", "all"])], axis=1)
+
+        df.columns = ["Intervals", "Files"]
+        df.to_csv(output[0], sep=" ", index=False)
+
+
+rule graph_speed_epic_vs_SICER:
+    input:
+        memory = "{prefix}/data/memory_usage.csv", file_size = "{prefix}/data/file_linenb.csv"
+    output:
+        "{prefix}/data/speed_triform2_vs_MACS2.csv"
+    run:
+        mem_df = pd.read_table(input.memory, sep=" ")
+        print(mem_df)
+        print(wildcards.bigwig)
+        mem_df = mem_df.loc[mem_df.Bigwig == wildcards.bigwig].drop("Bigwig", axis=1)
+        print(mem_df)
+
+
+        size_df = pd.read_table(input.file_size, sep=" ")
+
+        df = mem_df.merge(size_df, how="left", on="Files")
+
+        df.loc[:, "Software"] = df.Software.str.replace("sicer2_results", "epic2").replace("sicer_results", "SICER").replace("macs2_results", "MACS2")
+
+        df.to_csv(output[0], sep=" ")
+
+
+rule graph_epic_and_sicer_speeds_together:
+    input:
+        "{prefix}/data/speed_triform2_vs_MACS2.csv"
+    output:
+        "{prefix}/data/speed_triform2_vs_MACS2.{suffix}"
+    script:
+        "scripts/epic_speed.R"
