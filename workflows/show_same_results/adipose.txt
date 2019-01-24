@@ -1,0 +1,5 @@
+
+adipose chip adipose_chip1.bed.gz ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/Histone_H3K27me3/Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells/BI.Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells.H3K27me3.1.bed.gz
+adipose chip adipose_chip2.bed.gz ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/Histone_H3K27me3/Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells/BI.Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells.H3K27me3.92.bed.gz
+adipose input adipose_input1.bed.gz ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells/BI.Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells.Input.1.bed.gz
+adipose input adipose_input2.bed.gz ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells/BI.Adipose_Derived_Mesenchymal_Stem_Cell_Cultured_Cells.Input.92.bed.gz

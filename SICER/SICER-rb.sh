@@ -10,6 +10,9 @@
 ##############################################################
 # ##### Please replace PATHTO with your own directory ###### #
 ##############################################################
+
+source activate py27
+
 PATHTO=${11}
 SICER=$PATHTO/SICER
 PYTHONPATH=$SICER/lib

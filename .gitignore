@@ -1,4 +1,10 @@
+*.pdf
+*triform*
+*.csv
+*.gz
+*.png
 *.bed2
+.Rhistory
 *.snakemake
 *graph
 data/
@@ -12,3 +18,4 @@ data/
 *bed
 *FDR1.0
 *wig
+*snakemake*
