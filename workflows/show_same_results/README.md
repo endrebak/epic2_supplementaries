@@ -13,11 +13,14 @@ on publically available data. To avoid the problem of different effective genome
 fractions, I have used the same effective genome fraction for both SICER and
 epic2.
 
+These are the three tests done:
+
 1. The canonical test data which comes with SICER.
 2. Aorta H3K27me3 data (both ChIP and input) from the epigenome roadmap
 3. H3K27me3 and H3K4me3 data without input from a Hacat cell line
 
-I have made the data available on zenodo.
+These results should be reproducible by running this Snakefile. You can also
+test other files by updating sample_sheet.txt
 
 The three tests I do are all on bed files, since that is the only format SICER
 accepts. The first test is on ChIP only, the last two on ChIP + Input.
@@ -48,6 +51,7 @@ This will tell me if there is any difference in the two files with respect to lo
 ## Test 1: SICER example data, without input
 
 ChIP: https://raw.githubusercontent.com/biocore-ntnu/epic2/master/examples/test.bed
+
 Input: https://raw.githubusercontent.com/biocore-ntnu/epic2/master/examples/control.bed
 
 Here SICER finds 166 islands and so does SICER.
@@ -56,8 +60,9 @@ They are exactly the same.
 
 ## Test 2: epigenome roadmap aorta data
 
-chip: ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/Histone_H3K27me3/Aorta/UCSD.Aorta.H3K27me3.STL003.bed.gz
-input: ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Aorta/UCSD.Aorta.Input.STL002.bed.gz
+Chip: ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/Histone_H3K27me3/Aorta/UCSD.Aorta.H3K27me3.STL003.bed.gz
+
+Input: ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Aorta/UCSD.Aorta.Input.STL002.bed.gz
 
 Here SICER finds 65652 significant regions and epic2 finds 65658.
 
@@ -85,7 +90,7 @@ chr14   107040800       107043399       39      20      1.7864682548281746e-08  
 Investigating these two regions more closely in Python shows that neither should be an island:
 
 ```python
-Code to show that this should not be an island:
+# Code to show that this should not be an island:
 
 import pandas as pd
 import pyranges as pr
@@ -143,6 +148,4 @@ Collected bed files:
 
 (They were aligned with `hisat2 --threads 24 -x /mnt/cargo/genomes/hisat2/hg38/genome --no-spliced-alignment -k 1 --no-discordant --no-mixed  -U Satrom-chIP-05-Input_TGACCA_L002_R1_001.fastq`)
 
-Here SICER finds 65652 significant regions and epic2 finds 65658.
-
-As you can see, the discrepancies are like the ones found in test 2.
+(To be continued...)
