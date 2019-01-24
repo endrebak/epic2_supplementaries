@@ -64,12 +64,12 @@ rule run_epic2:
         result = "{prefix}/data/epic2_results/{dataset}/fdr_list.csv",
         memory = "{prefix}/data/epic2_results/{dataset}/memory.csv"
     params:
-        keep_duplicates = lambda w, input: 1 if (len(input.chip) == 1 and len(input.input == 1)) else 1000
+        keep_duplicates = lambda w, input: "" if (len(input.chip) == 1 and len(input.input == 1)) else "-kd"
     resources:
         instances = 1
     threads: 48
     shell:
-        "/usr/bin/time -v -o {output.memory} epic2 -egf 0.85 -gn hg38 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
+        "/usr/bin/time -v -o {output.memory} epic2 {params.keep_duplicates} -egf 0.85 -gn hg38 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
 
 
 
@@ -169,3 +169,179 @@ rule find_unique_regions_sicer:
 
 #         # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
 #         shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results_single/{wildcards.dataset}/ hg38 {params.keep_duplicates} 200 150 0.85 600 1.0 {pwd}")
+
+# ../../SICER/SICER_full.sh: 13: ../../SICER/SICER_full.sh: source: not found
+# #############################################
+# ######           SICER v1.1            ######
+# #############################################
+# Input library directory: /mnt/scratch/projects/epic_same_results/data/
+# ChIP library: satrom_chip.bed
+# Control library: satrom_input.bed
+# Output directory: /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom/
+# Species: hg38
+# Threshold for redundancy allowed for chip reads: 1000
+# Threshold for redundancy allowed for control reads: 1000
+# Window size: 200 bps
+# Fragment size: 150 bps. The shift for reads is half of 150
+# Effective genome size as a fraction of the reference genome of hg38: 0.85
+# Gap size: 600 bps
+# Evalue for identification of candidate islands that exhibit clustering: 1000
+# False discovery rate controlling significance: 1.0
+
+
+# Preprocess the raw satrom_chip file to remove redundancy with threshold 1000...
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/remove_redundant_reads.py -s hg38 -b /mnt/scratch/projects/epic_same_results/data//satrom_chip.bed -t 1000 -o /mnt/scratch/projects/epic_same_results/data/sicer_results/satr
+# om//satrom_chip-1000-removed.bed
+# chr1    Plus reads: 3321942     Retained plus reads: 3321942 ;  Minus reads: 3252434    Retained minus reads: 3252434
+# chr2    Plus reads: 3613228     Retained plus reads: 3613228 ;  Minus reads: 3573486    Retained minus reads: 3573486
+# chr3    Plus reads: 2619727     Retained plus reads: 2619727 ;  Minus reads: 2590655    Retained minus reads: 2590655
+# chr4    Plus reads: 1634836     Retained plus reads: 1634836 ;  Minus reads: 1614555    Retained minus reads: 1614555
+# chr5    Plus reads: 2443000     Retained plus reads: 2443000 ;  Minus reads: 2399105    Retained minus reads: 2399105
+# chr6    Plus reads: 1732409     Retained plus reads: 1732409 ;  Minus reads: 1726468    Retained minus reads: 1726468
+# chr7    Plus reads: 2298024     Retained plus reads: 2298024 ;  Minus reads: 2278772    Retained minus reads: 2278772
+# chr8    Plus reads: 2189283     Retained plus reads: 2189283 ;  Minus reads: 2159128    Retained minus reads: 2159128
+# chr9    Plus reads: 2191971     Retained plus reads: 2191971 ;  Minus reads: 2148232    Retained minus reads: 2148232
+# chr10   Plus reads: 1741491     Retained plus reads: 1741491 ;  Minus reads: 1721902    Retained minus reads: 1721902
+# chr11   Plus reads: 1986000     Retained plus reads: 1986000 ;  Minus reads: 1962948    Retained minus reads: 1962948
+# chr12   Plus reads: 1767701     Retained plus reads: 1767701 ;  Minus reads: 1751692    Retained minus reads: 1751692
+# chr13   Plus reads: 1163651     Retained plus reads: 1163651 ;  Minus reads: 1163439    Retained minus reads: 1163439
+
+# chr12   Plus reads: 1767701     Retained plus reads: 1767701 ;  Minus reads: 1751692    Retained minus reads: 1751692                                                                                                                                                  [119/286]
+# chr13   Plus reads: 1163651     Retained plus reads: 1163651 ;  Minus reads: 1163439    Retained minus reads: 1163439
+# chr14   Plus reads: 1341481     Retained plus reads: 1341481 ;  Minus reads: 1329179    Retained minus reads: 1329179
+# chr15   Plus reads: 1004877     Retained plus reads: 1004877 ;  Minus reads: 993600     Retained minus reads: 993600
+# chr16   Plus reads: 1049614     Retained plus reads: 1049614 ;  Minus reads: 1023428    Retained minus reads: 1023428
+# chr17   Plus reads: 1134578     Retained plus reads: 1134578 ;  Minus reads: 1122936    Retained minus reads: 1122936
+# chr18   Plus reads: 850454      Retained plus reads: 850454 ;   Minus reads: 837141     Retained minus reads: 837141
+# chr19   Plus reads: 559121      Retained plus reads: 559121 ;   Minus reads: 558744     Retained minus reads: 558744
+# chr20   Plus reads: 1186477     Retained plus reads: 1186477 ;  Minus reads: 1170356    Retained minus reads: 1170356
+# chr21   Plus reads: 266891      Retained plus reads: 266891 ;   Minus reads: 257529     Retained minus reads: 257529
+# chr22   Plus reads: 431445      Retained plus reads: 431445 ;   Minus reads: 423581     Retained minus reads: 423581
+# chrX    Plus reads: 1203519     Retained plus reads: 1203519 ;  Minus reads: 1177679    Retained minus reads: 1177679
+# chrY    Plus reads: 31634       Retained plus reads: 31634 ;    Minus reads: 27290      Retained minus reads: 27290
+# chrM    Plus reads: 26983       Retained plus reads: 26983 ;    Minus reads: 25857      Retained minus reads: 25857
+
+
+# Preprocess the raw satrom_input file to remove redundancy with threshold 1000...
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/remove_redundant_reads.py -s hg38 -b /mnt/scratch/projects/epic_same_results/data//satrom_input.bed -t 1000 -o /mnt/scratch/projects/epic_same_results/data/sicer_results/sat
+# rom//satrom_input-1000-removed.bed
+# chr1    Plus reads: 2281983     Retained plus reads: 2281983 ;  Minus reads: 2226151    Retained minus reads: 2226151
+# chr2    Plus reads: 2625815     Retained plus reads: 2625815 ;  Minus reads: 2589966    Retained minus reads: 2589966
+# chr3    Plus reads: 1973537     Retained plus reads: 1973537 ;  Minus reads: 1941258    Retained minus reads: 1941258
+# chr4    Plus reads: 1275271     Retained plus reads: 1275271 ;  Minus reads: 1260726    Retained minus reads: 1260726
+# chr5    Plus reads: 1785677     Retained plus reads: 1785677 ;  Minus reads: 1758104    Retained minus reads: 1758104
+# chr6    Plus reads: 1215766     Retained plus reads: 1215766 ;  Minus reads: 1203425    Retained minus reads: 1203425
+# chr7    Plus reads: 1617064     Retained plus reads: 1617064 ;  Minus reads: 1604063    Retained minus reads: 1604063
+# chr8    Plus reads: 1567743     Retained plus reads: 1567743 ;  Minus reads: 1558637    Retained minus reads: 1558637
+# chr9    Plus reads: 1531287     Retained plus reads: 1531287 ;  Minus reads: 1496834    Retained minus reads: 1496834
+# chr10   Plus reads: 1185019     Retained plus reads: 1185019 ;  Minus reads: 1174347    Retained minus reads: 1174347
+# chr11   Plus reads: 1363892     Retained plus reads: 1363892 ;  Minus reads: 1358870    Retained minus reads: 1358870
+# chr12   Plus reads: 1219624     Retained plus reads: 1219624 ;  Minus reads: 1201426    Retained minus reads: 1201426
+# chr13   Plus reads: 897570      Retained plus reads: 897570 ;   Minus reads: 896010     Retained minus reads: 896010
+# chr14   Plus reads: 949355      Retained plus reads: 949355 ;   Minus reads: 948208     Retained minus reads: 948208
+# chr15   Plus reads: 671198      Retained plus reads: 671198 ;   Minus reads: 659533     Retained minus reads: 659533
+# chr16   Plus reads: 674764      Retained plus reads: 674764 ;   Minus reads: 658035     Retained minus reads: 658035
+# chr17   Plus reads: 680126      Retained plus reads: 680126 ;   Minus reads: 664378     Retained minus reads: 664378
+# chr18   Plus reads: 641539      Retained plus reads: 641539 ;   Minus reads: 632885     Retained minus reads: 632885
+# chr19   Plus reads: 302962      Retained plus reads: 302962 ;   Minus reads: 302159     Retained minus reads: 302159
+# chr20   Plus reads: 783044      Retained plus reads: 783044 ;   Minus reads: 758321     Retained minus reads: 758321
+# chr21   Plus reads: 196846      Retained plus reads: 196846 ;   Minus reads: 189861     Retained minus reads: 189861
+# chr22   Plus reads: 260176      Retained plus reads: 260176 ;   Minus reads: 253375     Retained minus reads: 253375
+# chrX    Plus reads: 873645      Retained plus reads: 873645 ;   Minus reads: 864162     Retained minus reads: 864162
+# chrY    Plus reads: 23026       Retained plus reads: 23026 ;    Minus reads: 20238      Retained minus reads: 20238
+# chrM    Plus reads: 44210       Retained plus reads: 44210 ;    Minus reads: 44775      Retained minus reads: 44775
+
+
+# Partion the genome in windows ...
+# Generate summary files ...
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/run-make-graph-file-by-chrom.py -s hg38 -b /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom//satrom_chip-1000-removed.bed -w 200 -i 150 -o /mnt/scratch/proj
+# ects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200.graph
+# total tag count in chr1.bed is: 6574376.0 = 3321942.0+3252434.0
+# total tag count in chr2.bed is: 7186714.0 = 3613228.0+3573486.0
+# total tag count in chr3.bed is: 5210382.0 = 2619727.0+2590655.0
+# total tag count in chr4.bed is: 3249391.0 = 1634836.0+1614555.0
+# total tag count in chr5.bed is: 4842105.0 = 2443000.0+2399105.0
+# total tag count in chr6.bed is: 3458877.0 = 1732409.0+1726468.0
+# total tag count in chr7.bed is: 4576796.0 = 2298024.0+2278772.0
+# total tag count in chr8.bed is: 4348411.0 = 2189283.0+2159128.0
+# total tag count in chr9.bed is: 4340203.0 = 2191971.0+2148232.0
+# total tag count in chr10.bed is: 3463393.0 = 1741491.0+1721902.0
+# total tag count in chr11.bed is: 3948948.0 = 1986000.0+1962948.0
+# total tag count in chr12.bed is: 3519393.0 = 1767701.0+1751692.0
+# total tag count in chr13.bed is: 2327090.0 = 1163651.0+1163439.0
+# total tag count in chr14.bed is: 2670660.0 = 1341481.0+1329179.0
+# total tag count in chr15.bed is: 1998477.0 = 1004877.0+993600.0
+# total tag count in chr16.bed is: 2073042.0 = 1049614.0+1023428.0
+# total tag count in chr17.bed is: 2257514.0 = 1134578.0+1122936.0
+# total tag count in chr18.bed is: 1687595.0 = 850454.0+837141.0
+# total tag count in chr19.bed is: 1117865.0 = 559121.0+558744.0
+# total tag count in chr20.bed is: 2356833.0 = 1186477.0+1170356.0
+# total tag count in chr21.bed is: 524420.0 = 266891.0+257529.0
+# total tag count in chr22.bed is: 855026.0 = 431445.0+423581.0
+# total tag count in chrX.bed is: 2381198.0 = 1203519.0+1177679.0
+# total tag count in chrY.bed is: 58924.0 = 31634.0+27290.0
+# Ilegitimate read with end beyond chromosome length  16569  is ignored
+# chrM    16520   16569   HWI-ST586:60:C056YACXX:2:2105:16087:172818      60      +
+# Ilegitimate read with end beyond chromosome length  16569  is ignored
+# chrM    16526   16569   HWI-ST586:60:C056YACXX:2:1201:20960:69280       60      +
+# Ilegitimate read with end beyond chromosome length  16569  is ignored
+# chrM    16527   16569   HWI-ST586:60:C056YACXX:2:2308:17372:140717      60      +
+# total tag count in chrM.bed is: 52837.0 = 26980.0+25857.0
+
+
+# Normalize summary graph by total island filtered reads per million for satrom_chip ...
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/normalize.py -i /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200.graph -a 3 -t 1000000 -o /mnt/scratch/projects/epic_same_results/data/sic
+# er_results/satrom//satrom_chip-W200-normalized.graph
+
+
+# Convert the normalized summary graph into wig vstep format...
+# sh /home/endrebak/code/epic_paper/SICER/src/variableStep.sh /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200-normalized.graph /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200-normalized.wig satrom_chip
+# 200
+
+
+# Find candidate islands exhibiting clustering ...
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/find_islands_in_pr.py -s hg38 -b /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200.graph -w 200 -g 600 -t 0.85 -e 1000 -f /mnt/scratch/proj
+# ects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200-G600.scoreisland
+# Species:  hg38
+# Window_size:  200
+# Gap size:  600
+# E value is: 1000.0
+# Total read count: 75079974.0
+# Genome Length:  3088286401
+# Effective genome Length:  2625043440
+# Window average: 5.7202843089
+# opt.evalue: 1000.0
+# Total read count: 75079974.0
+# window_size: 200
+# opt.gap: 600
+# Window pvalue: 0.2
+# genome_length: 2625043440
+# self.average 5.7202843089
+# self.max_index 500
+# ('self.average=', 5.720284308895094)
+# ('self.poisson_value[0]=', 0.003278778583900193)
+# ('window_pvalue', 0.2)
+# ('poisson', 0, 0.003278778583900193)
+# ('poisson', 1, 0.01875554568582555)
+# ('poisson', 2, 0.05364352684569649)
+# ('poisson', 3, 0.1022854082964101)
+# ('poisson', 4, 0.1462754040267207)
+# ('poisson', 5, 0.16734737968626814)
+# ('poisson', 4, 0.1462754040267207)
+# ('poisson', 5, 0.16734737968626814)
+# ('poisson', 6, 0.1595457650256782)
+# ('poisson', 7, 0.13037816231815008)
+# ('poisson', 8, 0.09322501951638644)
+# ('self.gap_contribution', 3.3092096571469827)
+# ('self.boundary_contribution', 0.34277725102568035)
+# ('island_expectation length', 2827)
+# ('self.island_expectation[scaled_score]', 266579.1047128827)
+# ('scaled_score', 2826)
+# Minimum num of tags in a qualified window:  9
+# Generate the enriched probscore summary graph and filter the summary graph to get rid of ineligible windows
+# opt.summarygraph opt.summarygraph opt.summarygraph opt.summarygraph opt.summarygraph /mnt/scratch/projects/epic_same_results/data/sicer_results/satrom//satrom_chip-W200.graph
+# Determine the score threshold from random background
+# opt.evalue 1000.0
+# The score threshold is:  29.498
+# Make and write islands
+# Total number of islands:  342410

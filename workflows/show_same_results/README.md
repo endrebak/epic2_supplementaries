@@ -148,4 +148,14 @@ Collected bed files:
 
 (They were aligned with `hisat2 --threads 24 -x /mnt/cargo/genomes/hisat2/hg38/genome --no-spliced-alignment -k 1 --no-discordant --no-mixed  -U Satrom-chIP-05-Input_TGACCA_L002_R1_001.fastq`)
 
-(To be continued...)
+Here epic2 finds 291239 significant regions, while SICER finds 291241.
+
+The three regions unique to SICER are:
+
+```
+chr2    103063600       103065799       147     90      0.042517301272690655    1.1509594574200002      0.04998746438944515
+chr8    18218800        18221199        147     90      0.042517301272690655    1.1509594574200002      0.04998746438944515
+chr9    112048600       112049999       147     90      0.042517301272690655    1.1509594574200002      0.04998746438944515
+```
+
+As these all contain the same number of ChIP and Input reads, they seem like some weird artifact, and I take it as a good thing that epic2 did not consider them enriched.
