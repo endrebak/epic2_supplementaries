@@ -144,7 +144,11 @@ and H3K4me3, which is something you should not do in practice, but this does not
 matter when ensuring that the programs produce the same results. Think of it as
 throwing a curveball to both.
 
-Collected bed files:
+Collection and citation info: https://zenodo.org/record/2548491/
+
+H3K27me3.bed.gz: https://zenodo.org/record/2548491/files/Satrom-H3K27me3.bed.gz
+H3K4me3.bed.gz: https://zenodo.org/record/2548491/files/Satrom-H3K4me3.bed.gz
+Input.bed.gz: https://zenodo.org/record/2548491/files/Satrom-Input.bed.gz
 
 (They were aligned with `hisat2 --threads 24 -x /mnt/cargo/genomes/hisat2/hg38/genome --no-spliced-alignment -k 1 --no-discordant --no-mixed  -U Satrom-chIP-05-Input_TGACCA_L002_R1_001.fastq`)
 
