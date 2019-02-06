@@ -17,7 +17,7 @@ These are the three tests done:
 
 1. The canonical test data which comes with SICER.
 2. Aorta H3K27me3 data (both ChIP and input) from the epigenome roadmap
-3. H3K27me3 and H3K4me3 data without input from a Hacat cell line
+3. H3K27me3 and H3K4me3 data with input from a Hacat cell line
 
 These results should be reproducible by running this Snakefile. You can also
 test other files by updating sample_sheet.txt
