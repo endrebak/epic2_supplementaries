@@ -129,6 +129,15 @@ def combine_proximal_islands(islands, gap, window_size_buffer=3):
 			Final_islands = islands;
 		else:
 			for index in range(1, len(islands)):
+				if islands[index].chrom == "chr2" and islands[index].start in range(32400, 33399, 200):#range(103063600, 103065799, 200):
+					print(current_island)
+					print(current_island.chrom)
+					print(current_island.start)
+					print(current_island.end)
+					print(current_island.value)
+					print("----")
+
+
 				dist = islands[index].start - current_island.end;
 				if dist <= proximal_island_dist:
 					current_island.end = islands[index].end;

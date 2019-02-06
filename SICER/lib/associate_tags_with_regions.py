@@ -2,7 +2,7 @@
 # Authors: Chongzhi Zang, Weiqun Peng
 #
 # Disclaimer
-# 
+#
 # This software is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -15,7 +15,7 @@
 
 
 import re, os, sys, shutil
-from math import *   
+from math import *
 from string import *
 from optparse import OptionParser
 import operator
@@ -68,13 +68,13 @@ def find_readcount_on_islands(island_start_list, island_end_list, tag):
 	Islands are non-overlapping!
 	Returns the index of the island on which the tag lands, or -1.
 	"""
-	
+
 	index = bisect.bisect_right(island_start_list, tag);
 	if index - bisect.bisect_left(island_end_list, tag) == 1:
 		return index-1;
 	else:
 		return -1;
-	
+
 def main(argv):
 	parser = OptionParser()
 	parser.add_option("-s", "--species", action="store", type="string", dest="species", help="species, mm8, hg18", metavar="<str>")
@@ -82,40 +82,40 @@ def main(argv):
 	parser.add_option("-f", "--fragment_size", action="store", type="int", dest="fragment_size", metavar="<int>", help="average size of a fragment after CHIP experiment")
 	parser.add_option("-b", "--islandfile", action="store", type="string", dest="islandfile", metavar="<file>", help="island file in BED format")
 	parser.add_option("-o", "--outfile", action="store", type="string", dest="out_file", metavar="<file>", help="island read count file")
-	
+
 	(opt, args) = parser.parse_args(argv)
 	if len(argv) < 10:
         	parser.print_help()
         	sys.exit(1)
-	
+
 	if opt.species in GenomeData.species_chroms.keys():
 		chroms = GenomeData.species_chroms[opt.species];
 	else:
 		print "This species is not recognized, exiting";
 		sys.exit(1);
-	
-	
-	
+
+
+
 	islands = BED.BED(opt.species, opt.islandfile, "BED3", 0);
 	if Utility.fileExists(opt.readfile):
 		SeparateByChrom.separateByChrom(chroms, opt.readfile, '.bed1');
 	else:
 		print opt.readfile, " not found";
 		sys.exit(1)
-	
-	total = 0; 
+
+	total = 0;
 	library_size = get_total_tag_counts.get_total_tag_counts(opt.readfile);
-	
-	scaling_factor = 1000000; 
+
+	scaling_factor = 1000000;
 	out = open(opt.out_file, 'w');
 	for chrom in chroms:
 		if chrom in islands.keys():
 			island_list = islands[chrom];
 			island_readcount_list=[0]*len(island_list);
-			
+
 			if Utility.is_bed_sorted(island_list) == 0:
 				island_list.sort(key=operator.attrgetter('start'));
-				
+
 			island_start_list = []
 			island_end_list = []
 			for item in island_list:
@@ -124,27 +124,41 @@ def main(argv):
 
 			read_file = chrom + ".bed1";
 			f = open(read_file,'r')
+			print(chrom)
+			# if chrom == "chr2":
+			# 	wf = open(os.path.expanduser("~/chr2_hits.txt",'w+'))
+			# 	print(os.path.expanduser("~/chr2_hits.txt",'w+'))
 			for line in f:
 				if not re.match("#", line):
 					line = line.strip()
 					sline = line.split()
 					position = tag_position(sline, opt.fragment_size)
 					index = find_readcount_on_islands(island_start_list, island_end_list, position);
+					# if chrom == "chr2" and island_start_list[index] == 32400: # 103063600:
+					# 	print("index is", index)
+					# 	print("island is", island_list[index])
+					# 	wf.writeline(line + "\n")
+					# index = find_readcount_on_islands(island_start_list, island_end_list, position);
 					if index >= 0:
 						island_readcount_list[index] += 1;
 						total += 1;
+
+
+			# if chrom == "chr2":
+			# 	wf.close()
+
 			f.close();
-							
-			
+
+
 			for index in xrange(len(island_list)):
 				item = island_list[index];
 				normalized_read_count = island_readcount_list[index]/float(library_size) * scaling_factor;
-				outline = item.chrom + "\t" + str(item.start) + "\t" + str(item.end) + "\t" + str(island_readcount_list[index]) +  "\t" + str(normalized_read_count) + "\n";	
-				out.write(outline);		
-							
+				outline = item.chrom + "\t" + str(item.start) + "\t" + str(item.end) + "\t" + str(island_readcount_list[index]) +  "\t" + str(normalized_read_count) + "\n";
+				out.write(outline);
+
 	SeparateByChrom.cleanup(chroms, '.bed1');
 	out.close();
-	print "Total number of reads on islands are: ", total; 
+	print "Total number of reads on islands are: ", total;
 
 
 if __name__ == "__main__":

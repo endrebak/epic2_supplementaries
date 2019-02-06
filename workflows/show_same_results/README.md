@@ -152,7 +152,7 @@ Input.bed.gz: https://zenodo.org/record/2548491/files/Satrom-Input.bed.gz
 
 (They were aligned with `hisat2 --threads 24 -x /mnt/cargo/genomes/hisat2/hg38/genome --no-spliced-alignment -k 1 --no-discordant --no-mixed  -U Satrom-chIP-05-Input_TGACCA_L002_R1_001.fastq`)
 
-Here epic2 finds 291239 significant regions, while SICER finds 291241.
+Here epic2 finds 291239 significant regions, while SICER finds 291241. All except three are the same.
 
 The three regions unique to SICER are:
 
@@ -162,4 +162,11 @@ chr8    18218800        18221199        147     90      0.042517301272690655    
 chr9    112048600       112049999       147     90      0.042517301272690655    1.1509594574200002      0.04998746438944515
 ```
 
-As these all contain the same number of ChIP and Input reads, they seem like some weird artifact, and I take it as a good thing that epic2 did not consider them enriched.
+In epic2, these regions have a p-value of 0.05 instead of 0.049987, which is an insignificant difference, but which matters when the strict cutoff is 0.05:
+
+```
+grep -P "(103063600|18218800|112048600)" /mnt/scratch/projects/epic_same_results/data/epic2_results/satrom/fdr_list.csv
+chr2    103063600       103065799       0.04252957925200462     20.28201675415039       .       147     90      0.050002191215753555    0.20282016694545746
+chr8    18218800        18221199        0.04252957925200462     20.28201675415039       .       147     90      0.050002191215753555    0.20282016694545746
+chr9    112048600       112049999       0.04252957925200462     20.28201675415039       .       147     90      0.050002191215753555    0.20282016694545746
+```

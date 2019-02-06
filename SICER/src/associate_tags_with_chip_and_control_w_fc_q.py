@@ -97,12 +97,20 @@ def main(argv):
 				island_chip_readcount_list=[0]*len(island_list);
 				read_file = chrom + ".bed1";
 				f = open(read_file,'r')
+				print(chrom)
+				if chrom == "chr2":
+					wf = open(os.path.expanduser("~/chr2_hits.txt"),'w+')
+					print(os.path.expanduser("~/chr2_hits.txt"))
 				for line in f:
 					if not re.match("#", line):
 						line = line.strip()
 						sline = line.split()
 						position = associate_tags_with_regions.tag_position(sline, opt.fragment_size)
-						index =associate_tags_with_regions.find_readcount_on_islands(island_start_list, island_end_list, position);
+						index = associate_tags_with_regions.find_readcount_on_islands(island_start_list, island_end_list, position);
+						if chrom == "chr2" and island_start_list[index] == 103063600:
+							print("index is", index)
+							print("island is", island_list[index])
+							wf.write(line + "\n")
 						if index >= 0:
 							island_chip_readcount_list[index] += 1;
 							totalchip += 1;
@@ -121,6 +129,8 @@ def main(argv):
 						if index >= 0:
 							island_control_readcount_list[index] += 1;
 							totalcontrol += 1;
+				if chrom == "chr2":
+					wf.close()
 				f.close();
 
 				island_control_readcount[chrom] = island_control_readcount_list;

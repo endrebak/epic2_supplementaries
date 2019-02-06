@@ -17,12 +17,13 @@ shell.executable("bash")
 
 prefix = "/mnt/scratch/projects/epic_same_results"
 
-sample_sheet = pd.read_table("sample_sheet.txt", sep=" ", header=0, index_col=None)
+sample_sheet = pd.read_csv("sample_sheet.txt", sep=" ", header=0, index_col=None)
 ss = sample_sheet
 
 datasets = set(ss.Dataset)
 names = set(ss.Name)
-datasets = ["satrom"]
+# datasets = ["satrom"]
+# datasets
 
 wildcard_constraints:
     chip = "(chip|input)",
@@ -97,7 +98,7 @@ rule run_sicer:
     resources:
         instances = 1
     params:
-        keep_duplicates = lambda w, input: 1 if (len(input.chip) == 1 and len(input.input == 1)) else 1000
+        keep_duplicates = lambda w, input: 1 if (len(input.chip) == 1 and len(input.input == 1)) else int(1e6)
     run:
         pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
 
