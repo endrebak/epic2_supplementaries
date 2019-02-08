@@ -34,8 +34,10 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("{prefix}/data/sicer_results/unique_regions/{dataset}_epic2.bed", prefix=prefix, dataset=datasets),
-        expand("{prefix}/data/sicer_results/unique_regions/{dataset}_sicer.bed", prefix=prefix, dataset=datasets)
+        expand("{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_epic2.bed",
+               prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
+        expand("{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_sicer.bed",
+               prefix=prefix, dataset=datasets, significant="significant insignificant".split())
 
 def getfromss(w):
 
@@ -65,7 +67,7 @@ rule run_epic2:
         result = "{prefix}/data/epic2_results/{dataset}/fdr_list.csv",
         memory = "{prefix}/data/epic2_results/{dataset}/memory.csv"
     params:
-        keep_duplicates = lambda w, input: "" if (len(input.chip) == 1 and len(input.input == 1)) else "-kd"
+        keep_duplicates = lambda w, input: "" if (len(input.chip) == 1 and len(input.input) == 1) else "-kd"
     resources:
         instances = 1
     threads: 48
@@ -105,6 +107,7 @@ rule run_sicer:
         # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
         shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER_full.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/ hg38 {params.keep_duplicates} 200 150 0.85 600 1.0 {pwd}")
 
+
 def get_results(w):
 
     if w.software == "epic2":
@@ -120,32 +123,38 @@ rule significant_only:
     input:
         get_results
     output:
-        "{prefix}/data/sicer_results/significant_regions/{dataset}/{software}.bed"
+        "{prefix}/data/sicer_results/{significant}_regions/{dataset}/{software}.bed"
     run:
-        df = pd.read_table(input[0], header=0)
+        df = pd.read_csv(input[0], header=0, sep="\t")
 
         w = wildcards
-        if w.software == "epic2":
-            df[df.FDR <= 0.05].to_csv(output[0], sep="\t", index=False)
+        if w.significant == "significant":
+            if w.software == "epic2":
+                df[df.FDR <= 0.05].to_csv(output[0], sep="\t", index=False)
+            else:
+                df[df.iloc[:, 7] <= 0.05].to_csv(output[0], sep="\t", index=False)
         else:
-            df[df.iloc[:, 7] <= 0.05].to_csv(output[0], sep="\t", index=False)
+            if w.software == "epic2":
+                df[df.FDR > 0.05].to_csv(output[0], sep="\t", index=False)
+            else:
+                df[df.iloc[:, 7] > 0.05].to_csv(output[0], sep="\t", index=False)
 
 
 rule find_unique_regions_epic2:
     input:
-        epic2 = "{prefix}/data/sicer_results/significant_regions/{dataset}/epic2.bed",
-        sicer =  "{prefix}/data/sicer_results/significant_regions/{dataset}/sicer.bed"
+        epic2 = "{prefix}/data/sicer_results/{significant}_regions/{dataset}/epic2.bed",
+        sicer =  "{prefix}/data/sicer_results/{significant}_regions/{dataset}/sicer.bed"
     output:
-        "{prefix}/data/sicer_results/unique_regions/{dataset}_epic2.bed"
+        "{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_epic2.bed"
     shell:
         "bedtools subtract -a {input.epic2} -b {input.sicer} > {output[0]}"
 
 rule find_unique_regions_sicer:
     input:
-        epic2 = "{prefix}/data/sicer_results/significant_regions/{dataset}/epic2.bed",
-        sicer =  "{prefix}/data/sicer_results/significant_regions/{dataset}/sicer.bed"
+        epic2 = "{prefix}/data/sicer_results/{significant}_regions/{dataset}/epic2.bed",
+        sicer =  "{prefix}/data/sicer_results/{significant}_regions/{dataset}/sicer.bed"
     output:
-        "{prefix}/data/sicer_results/unique_regions/{dataset}_sicer.bed"
+        "{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_sicer.bed"
     shell:
         "bedtools subtract -b {input.epic2} -a {input.sicer} > {output[0]}"
 

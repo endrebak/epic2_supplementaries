@@ -152,7 +152,7 @@ Input.bed.gz: https://zenodo.org/record/2548491/files/Satrom-Input.bed.gz
 
 (They were aligned with `hisat2 --threads 24 -x /mnt/cargo/genomes/hisat2/hg38/genome --no-spliced-alignment -k 1 --no-discordant --no-mixed  -U Satrom-chIP-05-Input_TGACCA_L002_R1_001.fastq`)
 
-Here epic2 finds 291239 significant regions, while SICER finds 291241. All except three are the same.
+Here epic2 finds 291238 significant regions, while SICER finds 291241. All except three are the same.
 
 The three regions unique to SICER are:
 
@@ -170,3 +170,8 @@ chr2    103063600       103065799       0.04252957925200462     20.2820167541503
 chr8    18218800        18221199        0.04252957925200462     20.28201675415039       .       147     90      0.050002191215753555    0.20282016694545746
 chr9    112048600       112049999       0.04252957925200462     20.28201675415039       .       147     90      0.050002191215753555    0.20282016694545746
 ```
+
+Since we know that SICER uses a slightly wrong estimate of chip library size and
+input library size, the ratio of which is used to compute the FDR, it is no
+wonder that the P-values are different (but at the fifth decimal and hence
+insignificant.)
