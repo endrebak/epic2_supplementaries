@@ -97,20 +97,20 @@ def main(argv):
 				island_chip_readcount_list=[0]*len(island_list);
 				read_file = chrom + ".bed1";
 				f = open(read_file,'r')
-				print(chrom)
-				if chrom == "chr2":
-					wf = open(os.path.expanduser("~/chr2_hits.txt"),'w+')
-					print(os.path.expanduser("~/chr2_hits.txt"))
+				# print(chrom)
+				# if chrom == "chr2":
+				# 	wf = open(os.path.expanduser("~/chr2_hits.txt"),'w+')
+				# 	print(os.path.expanduser("~/chr2_hits.txt"))
 				for line in f:
 					if not re.match("#", line):
 						line = line.strip()
 						sline = line.split()
 						position = associate_tags_with_regions.tag_position(sline, opt.fragment_size)
 						index = associate_tags_with_regions.find_readcount_on_islands(island_start_list, island_end_list, position);
-						if chrom == "chr2" and island_start_list[index] == 103063600:
-							print("index is", index)
-							print("island is", island_list[index])
-							wf.write(line + "\n")
+						# if chrom == "chr2" and island_start_list[index] == 103063600:
+						# 	print("index is", index)
+						# 	print("island is", island_list[index])
+						# 	wf.write(line + "\n")
 						if index >= 0:
 							island_chip_readcount_list[index] += 1;
 							totalchip += 1;
@@ -129,8 +129,8 @@ def main(argv):
 						if index >= 0:
 							island_control_readcount_list[index] += 1;
 							totalcontrol += 1;
-				if chrom == "chr2":
-					wf.close()
+				# if chrom == "chr2":
+				# 	wf.close()
 				f.close();
 
 				island_control_readcount[chrom] = island_control_readcount_list;
@@ -143,6 +143,10 @@ def main(argv):
 
 	print "Total number of chip reads on islands is: ", totalchip;
 	print "Total number of control reads on islands is: ", totalcontrol;
+	print("chip size", chip_library_size)
+	print("control library size", control_library_size)
+	print("scaling factor", scaling_factor)
+	print("genomesize", genomesize)
 
 	#print "chip_background_read   ", chip_background_read
 	#print "control_background_read   ", control_background_read
@@ -158,17 +162,35 @@ def main(argv):
 					item = island_list[index];
 					observation = (island_chip_readcount[chrom])[index];
 					control_tag = (island_control_readcount[chrom])[index];
+					# print("island", chrom, item.start, item.end)
+					if (chrom == "chr2" and item.start == 47793200) or (chrom == "chr16" and item.start == 46385600):
+						_print = True
+					else:
+						_print = False
+					# print("chip", observation, "control", control_tag)
 					if (island_control_readcount[chrom])[index] > 0:
 						#average = (island_control_readcount[chrom])[index] * scaling_factor;
 						average = control_tag * scaling_factor
 						fc = float(observation)/float(average);
+						if _print:
+							print("-------" * 5)
+							print("observation", observation)
+							print("control_tag", control_tag)
+							print("scaling_factor", scaling_factor)
+							print("average", average)
+							print("fc", fc)
 					else:
 						length = item.end - item.start + 1;
 						average = length * control_library_size *1.0/genomesize;
 						average = min(0.25, average)* scaling_factor;
+						# print("average", average)
 						fc = float(observation)/float(average);
 					if observation > average:
+						if _print:
+							print("island_chip_readcount[chrom][index]", island_chip_readcount[chrom][index])
 						pvalue = scipy.stats.poisson.sf((island_chip_readcount[chrom])[index], average)[()];
+						if _print:
+							print("pvalue", pvalue)
 					else:
 						pvalue = 1;
 					pvalue_list.append(pvalue);
@@ -211,3 +233,73 @@ def main(argv):
 
 if __name__ == "__main__":
 	main(sys.argv)
+
+# Found a median readlength of 199.0
+
+# Using genome hg38.
+
+# Using an effective genome length of ~2625 * 1e6
+
+# Parsing ChIP file(s):
+#   /mnt/scratch/projects/epic_same_results/data/download/aorta/chip/aorta_chip.bed.gz
+
+# Valid ChIP reads: 16673486
+
+# Score threshold: 26.131
+
+# Number of tags in a window: 3
+
+# Number of islands found: 66011
+
+# Parsing Input file(s):
+#   /mnt/scratch/projects/epic_same_results/data/download/aorta/input/aorta_input.bed.gz
+
+# Valid background reads: 23451091
+
+# chip library size   16802936.0
+# control library size   23547846.0
+
+# Window size: 200 bps
+# Fragment size: 150 bps. The shift for reads is half of 150
+# Effective genome size as a fraction of the reference genome of hg38: 0.85
+# Gap size: 600 bps
+# Evalue for identification of candidate islands that exhibit clustering: 1000
+# False discovery rate controlling significance: 1.0
+
+
+# Calculate significance of candidate islands using the control library ...
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/associate_tags_with_chip_and_control_w_fc_q.py -s hg38  -a /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//aorta_chip-1000000-removed.bed -b /mnt/scratch/p
+# rojects/epic_same_results/data/sicer_results/aorta//aorta_input-1000000-removed.bed -d /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//aorta_chip-W200-G600.scoreisland -f 150 -t 0.85 -o /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//ao
+# rta_chip-W200-G600-islands-summary
+# chip library size   16802936.0
+# control library size   23547846.0
+# Total number of chip reads on islands is:  5305153
+# Total number of control reads on islands is:  2638242
+# ('chip size', 16802936.0)
+# ('control library size', 23547846.0)
+# ('scaling factor', 0.7135657333583717)
+# ('genomesize', 2625043440.85)
+# -----------------------------------
+# ('observation', 236)
+# ('control_tag', 55)
+# ('scaling_factor', 0.7135657333583717)
+# ('average', 39.246115334710446)
+# ('fc', 6.013334007385809)
+# -----------------------------------
+# ('observation', 3330)
+# ('control_tag', 3148)
+# ('scaling_factor', 0.7135657333583717)
+# ('average', 2246.304928612154)
+# ('fc', 1.4824345339692553)
+
+
+# epic2 results when same as SICER
+
+# -----------------------------------
+# {'chromosome': b'chr2', 'start': 47793200, 'end': 47801999, 'chip_count': 236, 'input_count': 55, 'score': 271.14258098602295, 'p_value': 1.947372233921782e-101, 'fold_change': 2.5881650944754826}
+# scaling_factor 0.7135657333583717
+# average 39.246115334710446
+# -----------------------------------
+# {'chromosome': b'chr16', 'start': 46385600, 'end': 46414199, 'chip_count': 3330, 'input_count': 3148, 'score': 27929.40560054779, 'p_value': 2.8139081324489086e-101, 'fold_change': 0.5679683950894392}
+# scaling_factor 0.7135657333583717
+# average 2246.304928612154

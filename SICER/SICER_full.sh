@@ -183,19 +183,19 @@ echo "Generate summary files ..."
 echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
 /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
 
-echo ""
-echo ""
-echo "Normalize summary graph by total island filtered reads per million for $SAMPLE ..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
-
-echo ""
-echo ""
-echo "Convert the normalized summary graph into wig vstep format..."
-echo "sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
-sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE
-
-rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
+# # echo ""
+# # echo ""
+# # echo "Normalize summary graph by total island filtered reads per million for $SAMPLE ..."
+# # echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
+# # /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
+#
+# # echo ""
+# # echo ""
+# # echo "Convert the normalized summary graph into wig vstep format..."
+# # echo "sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
+# # sh $SICER/src/variableStep.sh $SUMMARY_DIR/$NORMALIZEDSUMMARY $SUMMARY_DIR/$NORMALIZEDSUMMARYWIG $SAMPLE $WINDOW_SIZE
+#
+# # rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
 
 echo " "
@@ -222,41 +222,41 @@ echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filte
 
 
 
-echo ""
-echo ""
-echo "Convert island summary to island bed file of format chr start end ChIP-read-count"
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED
+# echo ""
+# echo ""
+# echo "Convert island summary to island bed file of format chr start end ChIP-read-count"
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/convert_summary_to_bed.py -i $ISLANDS_BED_DIR/$SIGNIFICANTISLANDS  -o  $ISLANDS_BED_DIR/$ISLANDBED
 
 
-echo ""
-echo ""
-echo "Filter reads with identified significant islands..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
+# echo ""
+# echo ""
+# echo "Filter reads with identified significant islands..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLANDBED  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
 
 
-echo ""
-echo ""
-echo "Make summary graph with filtered reads..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
+# echo ""
+# echo ""
+# echo "Make summary graph with filtered reads..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
 
 
-echo ""
-echo ""
-echo "Normalize summary graph with filtered reads for $SAMPLE by total island filtered reads per million..."
-echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
-/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
+# echo ""
+# echo ""
+# echo "Normalize summary graph with filtered reads for $SAMPLE by total island filtered reads per million..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
 
-echo ""
-echo ""
-echo "Convert the summary graph made with the filtered reads into wig vstep format and normalize by total island-filtered read count per million..."
-echo "sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
-sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE-islandfiltered $WINDOW_SIZE
+# echo ""
+# echo ""
+# echo "Convert the summary graph made with the filtered reads into wig vstep format and normalize by total island-filtered read count per million..."
+# echo "sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE $WINDOW_SIZE"
+# sh $SICER/src/variableStep.sh $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARYWIG $SAMPLE-islandfiltered $WINDOW_SIZE
 
-rm $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
-rm $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
+# rm $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
+# rm $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
 
 echo ""
 echo ""
