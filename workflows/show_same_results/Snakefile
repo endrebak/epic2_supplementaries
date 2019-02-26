@@ -77,7 +77,7 @@ rule run_epic2:
         instances = 1
     threads: 48
     shell:
-        "/usr/bin/time -v -o {output.memory} epic2 {params.keep_duplicates} -egf 0.85 -gn hg38 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
+        "/usr/bin/time -v -o {output.memory} epic2 -oa {params.keep_duplicates} -egf 0.85 -gn hg38 -t {input.chip} -c {input.input} -fdr 1 > {output.result}"
 
 
 
