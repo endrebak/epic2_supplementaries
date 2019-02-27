@@ -11,7 +11,7 @@
 # ##### Please replace PATHTO with your own directory ###### #
 ##############################################################
 
-source activate py27
+# source activate py27
 
 PATHTO=${11}
 SICER=$PATHTO/SICER
@@ -142,21 +142,21 @@ NORMALIZEDISLANDFILTEREDSUMMARYWIG=$SAMPLE-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-isl
 echo " "
 echo " "
 echo "Preprocess the raw $SAMPLE file to remove redundancy with threshold $THRESHOLD..."
-echo "python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $THRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED"
-python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $THRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $THRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/remove_redundant_reads.py -s $SPECIES -b $SAMPLEDIR/$SAMPLEBED -t $THRESHOLD -o $OUTPUTDIR/$FILTEREDSAMPLEBED
 
 echo " "
 echo " "
 echo "Partion the genome in windows ..."
 echo "Generate summary files for $SAMPLE..."
-echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $OUTPUTDIR/$FILTEREDSAMPLEBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $SUMMARY_DIR/$SUMMARY
 
 echo ""
 echo ""
 echo "Normalize summary graph by total redundancy-removed reads per million for $SAMPLE ..."
-echo "python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
-python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $SUMMARY_DIR/$SUMMARY -a 3 -t 1000000 -o $SUMMARY_DIR/$NORMALIZEDSUMMARY
 
 echo ""
 echo ""
@@ -170,42 +170,42 @@ rm $SUMMARY_DIR/$NORMALIZEDSUMMARY
 #     echo " "
 #     echo " "
 #     echo "Generate window read count histograms for $SAMPLE ... "
-#     echo "python $SICER/utility/get_windows_histogram.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -o $SUMMARY_DIR/$SUMMARYHIST"
-#     python $SICER/utility/get_windows_histogram.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -o $SUMMARY_DIR/$SUMMARYHIST
+#     echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/get_windows_histogram.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -o $SUMMARY_DIR/$SUMMARYHIST"
+#     /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/get_windows_histogram.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -o $SUMMARY_DIR/$SUMMARYHIST
 
 
 
 echo " "
 echo " "
 echo "Find significant islands with E-value $EVALUE for $SAMPLE..."
-echo "python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE -f $ISLANDS_BED_DIR/$ISLAND"
-python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE  -f $ISLANDS_BED_DIR/$ISLAND
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE -f $ISLANDS_BED_DIR/$ISLAND"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_islands_in_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -w $WINDOW_SIZE -g $GAP_SIZE -t $EFFECTIVEGENOME -e $EVALUE  -f $ISLANDS_BED_DIR/$ISLAND
 
 # Generating island statistics, optional
 # echo " "
 # echo " "
 # echo "Get island statistics for $SAMPLE..."
-# echo "python $SICER/utility/islands_statistics_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -i $ISLANDS_BED_DIR/$ISLAND -w $WINDOW_SIZE -o $ISLANDS_BED_DIR/$ISLANDSCOREHIST   -q $ISLANDS_BED_DIR/$ISLANDLENGTHHIST -r None"
-# python $SICER/utility/islands_statistics_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -i $ISLANDS_BED_DIR/$ISLAND -w $WINDOW_SIZE -o $ISLANDS_BED_DIR/$ISLANDSCOREHIST   -q $ISLANDS_BED_DIR/$ISLANDLENGTHHIST -r None
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/islands_statistics_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -i $ISLANDS_BED_DIR/$ISLAND -w $WINDOW_SIZE -o $ISLANDS_BED_DIR/$ISLANDSCOREHIST   -q $ISLANDS_BED_DIR/$ISLANDLENGTHHIST -r None"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/islands_statistics_pr.py -s $SPECIES -b $SUMMARY_DIR/$SUMMARY -i $ISLANDS_BED_DIR/$ISLAND -w $WINDOW_SIZE -o $ISLANDS_BED_DIR/$ISLANDSCOREHIST   -q $ISLANDS_BED_DIR/$ISLANDLENGTHHIST -r None
 
 echo ""
 echo ""
 echo "Filter reads with identified significant islands for $SAMPLE..."
-echo "python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLAND  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
-python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED  -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLAND  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLAND  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/utility/filter_raw_tags_by_islands.py -s $SPECIES -a $OUTPUTDIR/$FILTEREDSAMPLEBED  -i $FRAGMENT_SIZE -b $ISLANDS_BED_DIR/$ISLAND  -o  $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED
 
 echo ""
 echo ""
 echo "Make summary graph with filtered reads for $SAMPLE..."
-echo "python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
-python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/run-make-graph-file-by-chrom.py -s $SPECIES -b $ISLANDS_BED_DIR/$ISLANDFILTEREDRAWBED -w $WINDOW_SIZE -i $FRAGMENT_SIZE -o $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY
 
 
 echo ""
 echo ""
 echo "Normalize summary graph with filtered reads for $SAMPLE by total island filtered reads per million..."
-echo "python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
-python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/normalize.py -i $ISLANDS_BED_DIR/$ISLANDFILTEREDSUMMARY -a 3 -t 1000000 -o $ISLANDS_BED_DIR/$NORMALIZEDISLANDFILTEREDSUMMARY
 
 echo ""
 echo ""

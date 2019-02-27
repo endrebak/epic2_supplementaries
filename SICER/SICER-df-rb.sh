@@ -13,14 +13,16 @@
 ##############################################################
 # ##### Please replace PATHTO with your own directory ###### #
 ##############################################################
+# source activate py27
 
-SICER=/home/data/SICER1.1/SICER
+PATHTO=${7}
+SICER=$PATHTO/SICER
 PYTHONPATH=$SICER/lib
 export PYTHONPATH
 
 if [ $# -lt 6 ]; then
     echo ""
-    echo 1>&2 Usage: $0 ["KO bed file"] ["WT bed file"] ["window size (bp)"] ["gap size (bp)"] ["E-value"] ["FDR"] 
+    echo 1>&2 Usage: $0 ["KO bed file"] ["WT bed file"] ["window size (bp)"] ["gap size (bp)"] ["E-value"] ["FDR"]
     echo ""
     exit 1
 fi
@@ -49,11 +51,11 @@ WT=${WTBED%.*}
 echo "WT library: $WTBED"
 
 # Species, for allowed species see GenomeData.py
-SPECIES=hg18
+SPECIES=hg38
 echo "Species: $SPECIES"
 
 # Effective Genome as fraction of the genome size. It depends on read length.
-EFFECTIVEGENOME=0.74
+EFFECTIVEGENOME=0.85
 echo "Effective genome size as a fraction of reference genome: $EFFECTIVEGENOME"
 
 # KOTHRESHOLD is the threshold is for redundancy allowed for reads. KOTHRESHOLD=n
@@ -66,7 +68,7 @@ echo "Threshold for redundancy allowed for treated reads: $KOTHRESHOLD"
 WTTHRESHOLD=1
 echo "Threshold for redundancy allowed for WT reads: $WTTHRESHOLD"
 
-# WINDOW_SIZE is the size of the windows to scan the genome width. 
+# WINDOW_SIZE is the size of the windows to scan the genome width.
 # One WINDOW_SIZE is the smallest possible island.
 WINDOW_SIZE=$3
 echo "Window size: $WINDOW_SIZE bps"
@@ -118,11 +120,11 @@ KOISLAND=$KO-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE.scoreisland
 WTISLAND=$WT-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE.scoreisland
 UNIONISLAND=$KO-vs-$WT-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-union.island
 
-# This file stores the island-filtered non-redundant raw reads 
+# This file stores the island-filtered non-redundant raw reads
 KOISLANDFILTEREDRAWBED=$KO-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered.bed
 WTISLANDFILTEREDRAWBED=$WT-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-islandfiltered.bed
 
-#This file stores the summary of candidate islands, including tags counts, 
+#This file stores the summary of candidate islands, including tags counts,
 # pvalue, fold change and BH-corrected p-value
 MERGEDISLANDSUMMARYFILE=$KO-and-$WT-W$WINDOW_SIZE-G$GAP_SIZE-summary
 
@@ -132,55 +134,55 @@ INCREASEDISLANDS=$KO-W$WINDOW_SIZE-G$GAP_SIZE-increased-islands-summary-FDR$FDR
 DECREASEDISLANDS=$KO-W$WINDOW_SIZE-G$GAP_SIZE-decreased-islands-summary-FDR$FDR
 
 
-echo " "
-echo " "
-echo " "
-echo " "
-echo "Process the $KO library using SICER-rb"
-echo " sh $SICER/SICER-rb.sh $KODIR $KOBED $KOOUTPUTDIR $SPECIES $KOTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE "
-sh $SICER/SICER-rb.sh $KODIR $KOBED $KOOUTPUTDIR $SPECIES $KOTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE
+# echo " "
+# echo " "
+# echo " "
+# echo " "
+# echo "Process the $KO library using SICER-rb"
+# echo " sh $SICER/SICER-rb.sh $KODIR $KOBED $KOOUTPUTDIR $SPECIES $KOTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE "
+# sh $SICER/SICER-rb.sh $KODIR $KOBED $KOOUTPUTDIR $SPECIES $KOTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE $PATHTO
 
-echo " "
-echo " "
-echo " "
-echo " "
-echo "Process the $WT library using SICER-rb"
-echo " sh $SICER/SICER-rb.sh $KODIR $WTBED $WTOUTPUTDIR $SPECIES $WTTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE "
-sh $SICER/SICER-rb.sh $KODIR $WTBED $WTOUTPUTDIR $SPECIES $WTTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE
+# echo " "
+# echo " "
+# echo " "
+# echo " "
+# echo "Process the $WT library using SICER-rb"
+# echo " sh $SICER/SICER-rb.sh $KODIR $WTBED $WTOUTPUTDIR $SPECIES $WTTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE "
+# sh $SICER/SICER-rb.sh $KODIR $WTBED $WTOUTPUTDIR $SPECIES $WTTHRESHOLD $WINDOW_SIZE $FRAGMENT_SIZE $EFFECTIVEGENOME $GAP_SIZE $EVALUE $PATHTO
 
 
-echo " "
-echo " "
-echo ""
-echo ""
-echo "Merge the two identified sets of significant islands..."
-echo "python $SICER/src/find_union_islands.py -s $SPECIES -a $WTOUTPUTDIR/$WTISLAND -b $KOOUTPUTDIR/$KOISLAND -o $OUTPUTDIR/$UNIONISLAND"
-python $SICER/src/find_union_islands.py -s $SPECIES -a $WTOUTPUTDIR/$WTISLAND -b $KOOUTPUTDIR/$KOISLAND -o $OUTPUTDIR/$UNIONISLAND
+# echo " "
+# echo " "
+# echo ""
+# echo ""
+# echo "Merge the two identified sets of significant islands..."
+# echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_union_islands.py -s $SPECIES -a $WTOUTPUTDIR/$WTISLAND -b $KOOUTPUTDIR/$KOISLAND -o $OUTPUTDIR/$UNIONISLAND"
+# /mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/find_union_islands.py -s $SPECIES -a $WTOUTPUTDIR/$WTISLAND -b $KOOUTPUTDIR/$KOISLAND -o $OUTPUTDIR/$UNIONISLAND
 
 echo ""
 echo ""
 echo "Find island-filtered read counts from the two libraries on the merged islands and calculate significance of increase and decrease ..."
 #Use preprocessed raw reads for comparision
-echo "python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES  -a $KODIR/$FILTEREDKOBED -b $WTDIR/$FILTEREDWTBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE"
-python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES -a $KODIR/$FILTEREDKOBED -b $WTDIR/$FILTEREDWTBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES  -a $KODIR/$FILTEREDKOBED -b $WTDIR/$FILTEREDWTBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES -a $KODIR/$FILTEREDKOBED -b $WTDIR/$FILTEREDWTBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE
 
 #Use island filtered reads for comparison
-#echo "python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES  -a $KOOUTPUTDIR/$KOISLANDFILTEREDRAWBED -b $WTOUTPUTDIR/$WTISLANDFILTEREDRAWBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE"
-#python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES  -a $KOOUTPUTDIR/$KOISLANDFILTEREDRAWBED -b $WTOUTPUTDIR/$WTISLANDFILTEREDRAWBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE
+#echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES  -a $KOOUTPUTDIR/$KOISLANDFILTEREDRAWBED -b $WTOUTPUTDIR/$WTISLANDFILTEREDRAWBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE"
+#/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/compare_two_libraries_on_islands.py -s $SPECIES  -a $KOOUTPUTDIR/$KOISLANDFILTEREDRAWBED -b $WTOUTPUTDIR/$WTISLANDFILTEREDRAWBED -d $OUTPUTDIR/$UNIONISLAND -f $FRAGMENT_SIZE -o $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE
 
 
 echo ""
 echo ""
 echo "Identify significantly increased islands using BH corrected p-value cutoff ..."
-echo "python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 9 -o  $OUTPUTDIR/$INCREASEDISLANDS"
-python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 9 -o  $OUTPUTDIR/$INCREASEDISLANDS
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 9 -o  $OUTPUTDIR/$INCREASEDISLANDS"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 9 -o  $OUTPUTDIR/$INCREASEDISLANDS
 
 
 echo ""
 echo ""
 echo "Identify significantly decreased islands using BH corrected p-value cutoff ..."
-echo "python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 12 -o  $OUTPUTDIR/$DECREASEDISLANDS"
-python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 12 -o  $OUTPUTDIR/$DECREASEDISLANDS
+echo "/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 12 -o  $OUTPUTDIR/$DECREASEDISLANDS"
+/mnt/work/endrebak/software/anaconda/envs/py27/bin/python $SICER/src/filter_islands_by_significance.py -i $OUTPUTDIR/$MERGEDISLANDSUMMARYFILE -p $FDR -c 12 -o  $OUTPUTDIR/$DECREASEDISLANDS
 
 
 

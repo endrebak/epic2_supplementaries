@@ -41,7 +41,8 @@ rule all:
         expand("{prefix}/data/sicer_results/same_order/{significant}_{dataset}_sicer.bed",
                prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
         expand("{prefix}/data/sicer_results/same_order/{software}_{dataset}_{significant}.bed",
-               prefix=prefix, dataset=datasets, significant="significant".split(), software="epic2 sicer".split())
+               prefix=prefix, dataset=datasets, significant="significant".split(), software="epic2 sicer".split()),
+        expand("{prefix}/data/sicer_rb_results/{dataset}/{dataset}_chip-W200-G600-islands-summary-FDR1.0", prefix=prefix, dataset="test")
 
 
 def getfromss(w):
@@ -201,3 +202,29 @@ rule get_intersection_sorted_epic:
         "{prefix}/data/sicer_results/same_order/epic2_{dataset}_significant.bed"
     shell:
         "bedtools intersect -a <(head -1000 {input[1]}) -b <(head -1000 {input[0]}) > {output[0]}"
+
+
+
+rule run_sicer_rb_df:
+    input:
+        chip = "{prefix}/data/{dataset}_chip.bed",
+        input = "{prefix}/data/{dataset}_input.bed"
+    output:
+        result = "{prefix}/data/sicer_rb_results/{dataset}/{dataset}_chip-W200-G600-islands-summary-FDR1.0",
+        memory = "{prefix}/data/sicer_rb_results/{dataset}/memory.csv",
+    resources:
+        instances = 1
+    params:
+        keep_duplicates = lambda w, input: 1 if (len(input.chip) == 1 and len(input.input == 1)) else int(1e6)
+    run:
+        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
+
+        # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+
+        # print("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER.sh {prefix}/data/ {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed {prefix}/data/sicer_results/{wildcards.dataset}/{wildcards.bigwig} hg38 1 200 150 0.85 600 1.0 {pwd}".format(**vars()))
+        shell("cp {input.chip} .")
+        shell("cp {input.input} .")
+        shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER-df-rb.sh {wildcards.dataset}_chip.bed {wildcards.dataset}_input.bed 200 600 1000 1 {pwd}")
+
+        shell("head -1 ./test_chip-and-test_input-W200-G600-summary > {output.result}")
+        shell("tail -n +2 ./test_chip-and-test_input-W200-G600-summary | sort -k1,1V -k2,2 >> {output.result}")

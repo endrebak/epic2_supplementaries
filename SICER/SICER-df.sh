@@ -20,7 +20,7 @@ export PYTHONPATH
 
 if [ $# -lt 8 ]; then
     echo ""
-    echo 1>&2 Usage: $0 ["KO bed file"] ["KO control file"] ["WT bed file"]  ["WT control file"] ["window size (bp)"] ["gap size (bp)"] ["FDR for KO vs KOCONTROL or WT vs WTCONTROL"] ["FDR for WT vs KO"] 
+    echo 1>&2 Usage: $0 ["KO bed file"] ["KO control file"] ["WT bed file"]  ["WT control file"] ["window size (bp)"] ["gap size (bp)"] ["FDR for KO vs KOCONTROL or WT vs WTCONTROL"] ["FDR for WT vs KO"]
     echo ""
     exit 1
 fi
@@ -80,7 +80,7 @@ echo "Threshold for redundancy allowed for treated reads: $KOTHRESHOLD"
 WTTHRESHOLD=1
 echo "Threshold for redundancy allowed for WT reads: $WTTHRESHOLD"
 
-# WINDOW_SIZE is the size of the windows to scan the genome width. 
+# WINDOW_SIZE is the size of the windows to scan the genome width.
 # One WINDOW_SIZE is the smallest possible island.
 WINDOW_SIZE=$5
 echo "Window size: $WINDOW_SIZE bps"
@@ -133,11 +133,11 @@ WTISLAND=$WT-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-island.bed
 
 UNIONISLAND=$KO-vs-$WT-W$WINDOW_SIZE-G$GAP_SIZE-E$EVALUE-union.island
 
-# This file stores the island-filtered non-redundant raw reads 
+# This file stores the island-filtered non-redundant raw reads
 KOISLANDFILTEREDRAWBED=$KO-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered.bed
 WTISLANDFILTEREDRAWBED=$WT-W$WINDOW_SIZE-G$GAP_SIZE-FDR$FDR-islandfiltered.bed
 
-#This file stores the summary of candidate islands, including tags counts, 
+#This file stores the summary of candidate islands, including tags counts,
 # pvalue, fold change and BH-corrected p-value
 MERGEDISLANDSUMMARYFILE=$KO-and-$WT-W$WINDOW_SIZE-G$GAP_SIZE-summary
 
