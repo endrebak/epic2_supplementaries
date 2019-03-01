@@ -34,15 +34,16 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_epic2.bed",
-               prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
-        expand("{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_sicer.bed",
-               prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
-        expand("{prefix}/data/sicer_results/same_order/{significant}_{dataset}_sicer.bed",
-               prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
-        expand("{prefix}/data/sicer_results/same_order/{software}_{dataset}_{significant}.bed",
-               prefix=prefix, dataset=datasets, significant="significant".split(), software="epic2 sicer".split()),
-        expand("{prefix}/data/sicer_rb_results/{dataset}/{dataset}_chip-W200-G600-islands-summary-FDR1.0", prefix=prefix, dataset="test")
+        # expand("{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_epic2.bed",
+        #        prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
+        # expand("{prefix}/data/sicer_results/unique_regions/{significant}_{dataset}_sicer.bed",
+        #        prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
+        # expand("{prefix}/data/sicer_results/same_order/{significant}_{dataset}_sicer.bed",
+        #        prefix=prefix, dataset=datasets, significant="significant insignificant".split()),
+        # expand("{prefix}/data/sicer_results/same_order/{software}_{dataset}_{significant}.bed",
+        #        prefix=prefix, dataset=datasets, significant="significant".split(), software="epic2 sicer".split()),
+        expand("{prefix}/data/sicer_rb_results/{dataset}/{dataset}_chip-W200-G600-islands-summary-FDR1.0", prefix=prefix, dataset="test"),
+        expand("{prefix}/data/sicer_df_results/satrom_df.txt", prefix=prefix)
 
 
 def getfromss(w):
@@ -228,3 +229,36 @@ rule run_sicer_rb_df:
 
         shell("head -1 ./test_chip-and-test_input-W200-G600-summary > {output.result}")
         shell("tail -n +2 ./test_chip-and-test_input-W200-G600-summary | sort -k1,1V -k2,2 >> {output.result}")
+
+
+rule unzip:
+    input:
+        "{prefix}/data/download/satrom/{t2}/{t}.bed.gz"
+    output:
+        "{prefix}/data/download/satrom/{t2}/{t}.bed"
+    shell:
+        "zcat {input[0]} > {output[0]}"
+
+
+rule run_sicer_df:
+    input:
+        knockout = "{prefix}/data/download/satrom/chip/H3K27me3.bed",
+        wildtype = "{prefix}/data/download/satrom/chip/H3K4me3.bed",
+        input = "{prefix}/data/download/satrom/input/Input.bed",
+    output:
+        result = "{prefix}/data/sicer_df_results/satrom_df.txt",
+        memory = "{prefix}/data/sicer_df_results/memory.csv",
+    resources:
+        instances = 1
+    run:
+        pwd = check_output("echo $(dirname $(dirname `pwd`))", shell=True).decode().strip()
+
+        print("pwd " * 10)
+        print(pwd)
+        # shell("cp {input.knockout} .")
+        # shell("cp {input.wildtype} .")
+        # shell("cp {input.input} .")
+        shell("/usr/bin/time -v -o {output.memory} sh ../../SICER/SICER-df.sh H3K27me3.bed Input.bed H3K4me3.bed Input.bed 200 600 0.05 1 {pwd}")
+
+        shell("head -1 ./H3K27me3-and-H3K4me3-W200-G600-summary > {output.result}")
+        shell("tail -n +2 ./H3K27me3-and-H3K4me3-W200-G600-summary | sort -k1,1V -k2,2 >> {output.result}")

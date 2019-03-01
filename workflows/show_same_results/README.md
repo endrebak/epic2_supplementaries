@@ -1,12 +1,35 @@
 # epic2 and sicer give the same results
 
-By default, epic2 and SICER should give slightly different results. This is
-because epic2 chooses an effective genome size that is slightly different than
-SICER. Also, SICER contains a logical bug: when computing p-values, it also uses
-those reads falling outside of the genome boundaries. epic2 has a flag that
-allows you to run the original SICER algorithm, but it should only be used for
-debugging, as this is unlikely to be the desired behavior. In the below tests
-the `--original-algorithm` flag is used.
+By default, epic2 and SICER should give slightly different results. There are
+two reasons for this:
+
+1. epic2 chooses an effective genome fraction that is slightly different than SICER.
+
+2. SICER contains a logical bug: when computing p-values, it also counts reads
+falling outside of the genome boundaries. epic2 has a flag that allows you to
+run the original SICER algorithm (`--original-algorithm`), but it should only
+be used for debugging, as this is unlikely to be the desired behavior.
+
+#### Differences in egf
+
+epic2 contains four precomputed values of the egf for ~80 genomes. There are
+four for each to account for differences in readlengths (36, 50, 75, 100). The
+resulting values differ a bit from those computed for SICER.
+
+#### Logical bug
+
+Since the count for chip_reads and input_reads differ slightly whether or not
+out of bounds reads are included, the scaling factor (#chip/#input) and zero
+scaler (#input/#egf) are slightly different. The scaling factor is multiplied
+with all p-values, and in addition the zero scaler is multiplied with those for
+regions with an input count of zero. This might lead to differences in p-values
+and the ordering of regions.
+
+In the below tests the flag `--original algorithm` is used, so that we can
+ensure that epic2 and SICER give the same results, ignoring the logical bug
+above.
+
+## The tests
 
 To illustrate that SICER and epic2 do indeed give the same results, I have done
 three tests on publically available data. To avoid the problem of different
@@ -25,7 +48,9 @@ test other files by updating sample_sheet.txt
 The three tests I do are all on bed files, since that is the only format SICER
 accepts. All tests are on ChIP + Input.
 
-## Ensuring that the regions are the same
+For the tests of the SICER-rb, see this [README](show_same_result_df.md).
+
+#### Ensuring that the regions are the same
 
 To ensure that the regions I get are exactly the same I used bedtools subtract on each pair.
 
@@ -36,13 +61,13 @@ bedtools subtract -b epic2_results.bed -a SICER_results.bed > locs_only_in_SICER
 
 This will tell me if there is any difference in the two files with respect to location.
 
-## Ensuring the ordering is the same
+#### Ensuring the ordering is the same
 
 To ensure that the regions have the exact same rank, I take the top 1000 lowest
 FDR-values from each SICER/epic2 run and do an intersection. The end result
 should contain 1000 regions if the rank is the same.
 
-## Parameters used in the below tests
+#### Parameters used in the below tests
 
 * Egf: 0.85
 * Genome: hg38
@@ -50,6 +75,7 @@ should contain 1000 regions if the rank is the same.
 * Bin size: 200
 * Max gaps: 3 (or 600 nucleotides)
 * FDR-cutoff: 0.05
+* --original-algorithm
 
 ## Test 1: SICER example data, without input
 
