@@ -16,6 +16,10 @@ epic2 contains four precomputed values of the egf for ~80 genomes. There are
 four for each to account for differences in readlengths (36, 50, 75, 100). The
 resulting values differ a bit from those computed for SICER.
 
+The egf both affects which regions become candidate islands and the p-value
+these regions get. However, the small differences between SICER and epic2 do not
+matter much.
+
 #### Logical bug
 
 Since the count for chip_reads and input_reads differ slightly whether or not
