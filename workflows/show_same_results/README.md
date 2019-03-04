@@ -52,7 +52,7 @@ test other files by updating sample_sheet.txt
 The three tests I do are all on bed files, since that is the only format SICER
 accepts. All tests are on ChIP + Input.
 
-For the tests of the SICER-rb, see this [README](show_same_result_df.md).
+<!-- For the tests of the SICER-rb, see this [README](show_same_result_df.md). -->
 
 #### Ensuring that the regions are the same
 
