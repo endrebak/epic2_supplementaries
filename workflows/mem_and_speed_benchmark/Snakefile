@@ -136,7 +136,7 @@ infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chi
 
 rule all:
     input:
-        expand("{prefix}/data/speed_epic2_vs_SICER_{bigwig}.{suffix}", prefix=prefix, bigwig="no_bigwig", suffix="png pdf".split())
+        expand("{prefix}/data/speed_epic2_vs_SICER_{bigwig}.{suffix}", prefix=prefix, bigwig="no_bigwig", suffix="eps png pdf".split())
         # expand("{prefix}/data/{type}_epic2_vs_SICER_{bigwig}.pdf", prefix=prefix, bigwig="no_bigwig", type="memory speed".split())
         # "{prefix}/data/speed_epic_vs_SICER_memory.pdf".format(prefix=prefix),
         # expand("{prefix}/data/{caller}_results/{subset}/{bigwig}/memory.csv", subset="0h early all".split(), bigwig="no_bigwig", prefix=prefix, caller="sicer sicer2 macs2".split()), #  "all early".split()

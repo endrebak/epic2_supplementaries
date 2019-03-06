@@ -152,3 +152,62 @@ wc -l /mnt/scratch/projects/epic_same_results/data/sicer_results/same_order/*_sa
  1000 27944 /mnt/scratch/projects/epic_same_results/data/sicer_results/same_order/epic2_satrom_significant.bed
  1000 27944 /mnt/scratch/projects/epic_same_results/data/sicer_results/same_order/sicer_satrom_significant.bed
 ```
+
+<!-- ############################################# -->
+<!-- ######           SICER v1.1            ###### -->
+<!-- ############################################# -->
+<!-- Input library directory: /mnt/scratch/projects/epic_same_results/data/ -->
+<!-- ChIP library: aorta_chip.bed -->
+<!-- Control library: aorta_input.bed -->
+<!-- Output directory: /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta/ -->
+<!-- Species: hg38 -->
+<!-- Threshold for redundancy allowed for chip reads: 1 -->
+<!-- Threshold for redundancy allowed for control reads: 1 -->
+<!-- Window size: 200 bps -->
+<!-- Fragment size: 150 bps. The shift for reads is half of 150 -->
+<!-- Effective genome size as a fraction of the reference genome of hg38: 0.85 -->
+<!-- Gap size: 600 bps -->
+<!-- Evalue for identification of candidate islands that exhibit clustering: 1000 -->
+<!-- False discovery rate controlling significance: 1.0 -->
+
+
+<!-- Calculate significance of candidate islands using the control library ... -->
+<!-- /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/associate_tags_with_chip_and_control_w_fc_q.py -s hg38  -a /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//aorta_chip-1-removed.bed -b /mnt/scratch/project -->
+<!-- s/epic_same_results/data/sicer_results/aorta//aorta_input-1-removed.bed -d /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//aorta_chip-W200-G600.scoreisland -f 150 -t 0.85 -o /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//aorta_chip-W20 -->
+<!-- 0-G600-islands-summary -->
+<!-- chip library size   16802936.0 -->
+<!-- control library size   23547846.0 -->
+<!-- Total number of chip reads on islands is:  5305153 -->
+<!-- Total number of control reads on islands is:  2638242 -->
+<!-- ('chip size', 16802936.0) -->
+<!-- ('control library size', 23547846.0) -->
+<!-- ('scaling factor', 0.7135657333583717) -->
+<!-- ('genomesize', 2625043440.85) -->
+<!-- ----------------------------------- -->
+<!-- ('item.chrom', 'chr11') -->
+<!-- ('item.start', 117299800) -->
+<!-- ('item.end', 117316599) -->
+<!-- ('observation', 378) -->
+<!-- ('control_tag', 129) -->
+<!-- ('scaling_factor', 0.7135657333583717) -->
+<!-- ('average', 92.04997960322994) -->
+<!-- ('fc', 4.106464788252233) -->
+<!-- ('island_chip_readcount[chrom][index]', 378) -->
+<!-- ('pvalue', 1.2983037399017806e-110) -->
+
+
+<!-- Identify significant islands using FDR criterion ... -->
+<!-- /mnt/work/endrebak/software/anaconda/envs/py27/bin/python /home/endrebak/code/epic_paper/SICER/src/filter_islands_by_significance.py -i /mnt/scratch/projects/epic_same_results/data/sicer_results/aorta//aorta_chip-W200-G600-islands-summary -p 1.0 -c 7 -o /mnt/scratch/proje -->
+<!-- cts/epic_same_results/data/sicer_results/aorta//aorta_chip-W200-G600-islands-summary-FDR1.0 -->
+<!-- Given significance 1.0 ,  there are 66011 significant islands -->
+
+<!-- ('item.chrom', 'chr11') -->
+<!-- ('item.start', 117299800) -->
+<!-- ('item.end', 117316599) -->
+<!-- ('observation', 378) -->
+<!-- ('control_tag', 129) -->
+<!-- ('scaling_factor', 0.7135657333583717) -->
+<!-- ('average', 92.04997960322994) -->
+<!-- ('fc', 4.106464788252233) -->
+<!-- ('island_chip_readcount[chrom][index]', 378) -->
+<!-- ('pvalue', 1.2983037399017806e-110) -->

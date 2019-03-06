@@ -163,7 +163,7 @@ def main(argv):
 					observation = (island_chip_readcount[chrom])[index];
 					control_tag = (island_control_readcount[chrom])[index];
 					# print("island", chrom, item.start, item.end)
-					if (chrom == "chr2" and item.start == 47793200) or (chrom == "chr16" and item.start == 46385600):
+					if (chrom == "chr11" and item.start == 117299800):
 						_print = True
 					else:
 						_print = False
@@ -174,6 +174,9 @@ def main(argv):
 						fc = float(observation)/float(average);
 						if _print:
 							print("-------" * 5)
+							print("item.chrom", item.chrom)
+							print("item.start", item.start)
+							print("item.end", item.end)
 							print("observation", observation)
 							print("control_tag", control_tag)
 							print("scaling_factor", scaling_factor)
