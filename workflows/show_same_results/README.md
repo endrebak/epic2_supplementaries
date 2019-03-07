@@ -52,6 +52,9 @@ SICER discards all reads where the end falls outside of the chromosome
 boundaries. epic2 discards all reads where the shifted 5' end falls outside of
 `math.ceil(chromosome_size / bin_size) * bin_size)`.
 
+This might affect the ordering of the results as the length of the region is
+used to give regions without input a pseudocount.
+
 ## The tests
 
 To illustrate that SICER and epic2 do indeed give the same results, we ran the
@@ -84,7 +87,7 @@ If there is any difference in the output from epic2 and SICER with respect to lo
 
 #### Ensuring the ordering is the same
 
-To test whether the regions identified by SICER and epic2 have the same ranks, as determined by the regions’ p-values, we compared the p-value sorted list of significant regions from SICER and epic2 with the stringent unix diff tool to ensure these were exactly the same.
+To test whether the regions identified by SICER and epic2 have the same ranks, as determined by the regions’ p-values, we compared the FDR sorted list of significant regions from SICER and epic2 with the stringent unix diff tool to ensure these were exactly the same.
 
 #### Parameters used in the tests
 

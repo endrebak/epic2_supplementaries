@@ -254,10 +254,10 @@ rule significant_only:
 
         w = wildcards
         if w.software == "epic2":
-            df = pd.read_csv(input[0], header=0, sep="\t", usecols=[0, 1, 2, 3])
+            df = pd.read_csv(input[0], header=0, sep="\t", usecols=[0, 1, 2, 8])
             df.columns = "Chromosome Start End PValue".split()
         else:
-            df = pd.read_csv(input[0], header=None, sep="\t", usecols=[0, 1, 2, 5])
+            df = pd.read_csv(input[0], header=None, sep="\t", usecols=[0, 1, 2, 7])
             df.columns = "Chromosome Start End PValue".split()
 
         if w.significant == "significant":
