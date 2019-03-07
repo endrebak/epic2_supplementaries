@@ -84,7 +84,7 @@ If there is any difference in the output from epic2 and SICER with respect to lo
 
 #### Ensuring the ordering is the same
 
-To test whether the regions identified by SICER and epic2 have the same ranks, as determined by the regions’ p-values, we compared the p-value sorted list of significant regions from SICER and epic2. To ensure these were exactly the same.
+To test whether the regions identified by SICER and epic2 have the same ranks, as determined by the regions’ p-values, we compared the p-value sorted list of significant regions from SICER and epic2 with the stringent unix diff tool to ensure these were exactly the same.
 
 #### Parameters used in the tests
 
@@ -161,6 +161,6 @@ There are no differences in ordering.
 
 Marcais, G. and Kingsford, C. A fast, lock-free approach for efficient parallel counting of occurrences of k-mers. *Bioinformatics* 2011;27(6):764-770. [DOI: 10.1093/bioinformatics/btr011](https://doi.org/10.1093/bioinformatics/btr011)
 
-<!-- Quinlan, A.R. and Hall, I.M. BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics* 2010;26(6):841-842. [DOI: 10.1093/bioinformatics/btq033](https://doi.org/10.1093/bioinformatics/btq033) -->
+Quinlan, A.R. and Hall, I.M. BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics* 2010;26(6):841-842. [DOI: 10.1093/bioinformatics/btq033](https://doi.org/10.1093/bioinformatics/btq033)
 
 Xu, S., *et al.* Spatial clustering for identification of ChIP-enriched regions (SICER) to map regions of histone methylation patterns in embryonic stem cells. *Methods Mol Biol* 2014;1150:97-111. [DOI: 10.1007/978-1-4939-0512-6_5](https://doi.org/10.1007/978-1-4939-0512-6_5)
