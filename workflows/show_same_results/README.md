@@ -1,3 +1,4 @@
+
 # epic2 and sicer give the same results
 
 By default, epic2 and SICER should give slightly different results. There are
@@ -12,7 +13,7 @@ original SICER algorithm with the bug included (`--original-algorithm`). This
 flag is mainly included for debugging purposes, as this bug is undesired for
 regular ChIP-seq analyses.
 
-3. SICER and epic2 compute out of bounds reads in a different way.
+3. SICER and epic2 identify out of bounds reads in different ways.
 
 #### Differences in EGF
 
@@ -21,12 +22,17 @@ The effective genome length is the total length of mappable regions in the genom
 epic2 contains four precomputed values of the EGF for ~80 genomes. These four
 values correspond to four different read lengths (36, 50, 75, 100); the values
 were computed by running jellyfish (Marcais and Kingsford, 2011) with the
-following options: ``` jellyfish count -t 25 -m {read_length} -s {genome_length}
--L 1 -U 1 --out-counter-len 1 --counter-len 1 {fasta} ``` Here, `{read_length}`
+following options:
+
+```
+jellyfish count -t 25 -m {read_length} -s {genome_length} -L 1 -U 1 \
+          --out-counter-len 1 --counter-len 1 {fasta}
+```
+
+Here, `{read_length}`
 is the read length, `{fasta}` is the FASTA file containing the genome sequence,
 and `{genome_length}` is the number of nucleotides in the genome FASTA file. The
-resulting values differ from those used in SICER, which does not cite their
-source for suggested effective genome sizes. To illustrate, SICER uses the
+resulting values differ from those used in SICER, which uses values computed based on the approach described by Koehler, et al. (2011). To illustrate, SICER uses the
 default value of 0.74 for the hg18 version of the human genome, whereas epic2
 uses values 0.8247546892509732, 0.8665593467306165, 0.8960340102187695, and
 0.9054491980427741 for hg18 and read lengths 36, 50, 75, and 100, respectively.
@@ -49,11 +55,9 @@ For the tests described in the following sections, we ran epic2 with this flag.
 #### Computing out of bounds reads
 
 SICER discards all reads where the end falls outside of the chromosome
-boundaries. epic2 discards all reads where the shifted 5' end falls outside of
-`math.ceil(chromosome_size / bin_size) * bin_size)`.
-
-This might affect the ordering of the results as the length of the region is
-used to give regions without input a pseudocount.
+boundaries. epic2 discards all reads where the corresponding DNA fragment’s estimated mid point falls outside of
+`math.ceil(chromosome_size / bin_size) * bin_size)`. The consequence is that epic2 can have more reads than SICER has within the last bin of the chromosome, resulting in epic2 potentially identifying longer regions towards the end of the chromosomes than SICER does. This difference might also affect the ordering of the results, as the length of the region is
+used to give regions without input a pseudo count.
 
 ## The tests
 
@@ -87,7 +91,7 @@ If there is any difference in the output from epic2 and SICER with respect to lo
 
 #### Ensuring the ordering is the same
 
-To test whether the regions identified by SICER and epic2 have the same ranks, as determined by the regions’ p-values, we compared the FDR sorted list of significant regions from SICER and epic2 with the stringent unix diff tool to ensure these were exactly the same.
+To test whether the regions identified by SICER and epic2 have the same ranks, as determined by the regions’ p-values, we used the unix tool `diff` to compare the FDR-sorted list of significant regions from SICER and epic2 to ensure these were exactly the same.
 
 #### Parameters used in the tests
 
@@ -113,11 +117,11 @@ Chip: [ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/H
 
 Input: [ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Aorta/UCSD.Aorta.Input.STL002.bed.gz](ftp://ftp.genboree.org/EpigenomeAtlas/Current-Release/experiment-sample/ChIP-Seq_Input/Aorta/UCSD.Aorta.Input.STL002.bed.gz)
 
-Here epic2 finds one region more than SICER. It is located at the end of
+Here epic2 finds one region more than SICER does. The region is located at the end of
 chromosome 15 (length chr15: 101991189). Remember that SICER has a stricter
 out-of-bounds cutoff than epic2 so this is to be expected.
 
-The other differences are the following:
+The other differences are the following (output from `diff`):
 
 ```
 4539a4540
@@ -131,10 +135,10 @@ The other differences are the following:
 43489d43488
 ```
 
-As we see, epic2 and SICER disagree slightly on the length of the regions that
-are close to the boundaries (chr6: 170805979, chr8: 145138636).
+For these two regions, epic2 and SICER disagree slightly on the length of the regions. Both regions
+are close to the chromosome boundaries (chr6: 170805979, chr8: 145138636).
 
-### Test 3: Hacat dataset
+### Test 3: HaCaT dataset
 
 In this test we used two ChIP-files and one Input file. We are mixing H3K27me3
 and H3K4me3, which is something you should not do in practice, but this does not
@@ -161,6 +165,8 @@ chr1    38000   51399   3.76376192797827e-10    28.25109196539736       .       
 There are no differences in ordering.
 
 ## References
+
+Koehler, R., et al. The uniqueome: a mappability resource for short-tag sequencing. *Bioinformatics* 2011;27(2):272-274. [DOI: 10.1093/bioinformatics/btq640](https://doi.org/10.1093/bioinformatics/btq640)
 
 Marcais, G. and Kingsford, C. A fast, lock-free approach for efficient parallel counting of occurrences of k-mers. *Bioinformatics* 2011;27(6):764-770. [DOI: 10.1093/bioinformatics/btr011](https://doi.org/10.1093/bioinformatics/btr011)
 

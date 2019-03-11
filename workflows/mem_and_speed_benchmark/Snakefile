@@ -38,6 +38,9 @@ shell.executable("bash")
 
 prefix = "/mnt/scratch/projects/epic_bencmarks"
 
+wildcard_constraints:
+    bigwig = "no_bigwig"
+
 
 chip_data = ['/mnt/scratch/projects/epipp/data/bam/Exp1_0h_H3K27me3.bed',
              '/mnt/scratch/projects/epipp/data/bam/Exp1_12h_H3K27me3.bed',
@@ -136,7 +139,7 @@ infiles = {("chip", "early"): chip_data_early, ("chip", "all"): chip_data, ("chi
 
 rule all:
     input:
-        expand("{prefix}/data/speed_epic2_vs_SICER_{bigwig}.{suffix}", prefix=prefix, bigwig="no_bigwig", suffix="eps png pdf".split())
+        expand("{prefix}/data/speed_epic2_vs_SICER_{bigwig}_bw.{suffix}", prefix=prefix, bigwig="no_bigwig", suffix="eps") # png pdf".split()
         # expand("{prefix}/data/{type}_epic2_vs_SICER_{bigwig}.pdf", prefix=prefix, bigwig="no_bigwig", type="memory speed".split())
         # "{prefix}/data/speed_epic_vs_SICER_memory.pdf".format(prefix=prefix),
         # expand("{prefix}/data/{caller}_results/{subset}/{bigwig}/memory.csv", subset="0h early all".split(), bigwig="no_bigwig", prefix=prefix, caller="sicer sicer2 macs2".split()), #  "all early".split()
@@ -361,6 +364,15 @@ rule graph_epic_and_sicer_speeds_together:
         "{prefix}/data/speed_epic2_vs_SICER_{bigwig}.{suffix}"
     script:
         "scripts/epic_speed.R"
+
+
+rule graph_epic_and_sicer_speeds_together_bw:
+    input:
+        "{prefix}/data/speed_epic2_vs_SICER_{bigwig}.csv"
+    output:
+        "{prefix}/data/speed_epic2_vs_SICER_{bigwig}_bw.{suffix}"
+    script:
+        "scripts/epic_speed_bw.R"
 
 
 

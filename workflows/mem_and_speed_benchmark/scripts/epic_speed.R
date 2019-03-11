@@ -12,9 +12,3 @@ g = ggplot(df, aes(x=Intervals, y=MaxRSSGB)) + geom_line(aes(colour=Software)) +
 g$layout$l[g$layout$name == "title"] <- 1
 
 ggsave(snakemake@output[[1]], arrangeGrob(f, g, nrow=1, ncol=2), height=3, width=6)
-## ggsave(snakemake@output[[1]], height=3, width=3)
-
-## --trim '1cm 2cm 1cm 2cm' --clip true
-## (to trim those amounts from left, bottom,
-##   right and top, respectively, of input
-##   pages)
